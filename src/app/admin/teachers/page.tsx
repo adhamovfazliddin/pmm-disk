@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/db";
 import TeachersClient from "./TeachersClient";
 
@@ -9,3 +10,4 @@ export default async function TeachersPage() {
 
   return <TeachersClient initialTeachers={teachers} />;
 }
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/db";
 import MaterialsClient from "./MaterialsClient";
 
@@ -19,3 +20,4 @@ export default async function MaterialsPage() {
 
   return <MaterialsClient initialMaterials={materials} activeTeachers={teachers} />;
 }
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import AppLayout from "@/components/layout/AppLayout";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -14,3 +15,4 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   
   return <AppLayout role={session.role as string} email={user?.email || ""} name={user?.name || ""} department={user?.department || ""}>{children}</AppLayout>;
 }
+

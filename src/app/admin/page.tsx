@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/db";
 import AdminClient from "./AdminClient";
 import { getAdminAnalytics } from "@/app/actions/analytics";
@@ -30,3 +31,4 @@ export default async function AdminDashboard() {
     />
   );
 }
+
