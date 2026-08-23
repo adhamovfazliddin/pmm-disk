@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Role {
+  SUPERADMIN
+  TEACHER
+}
+
+enum Visibility {
+  GLOBAL
+  RESTRICTED
+}
+
+enum ActionType {
+  VIEW
+  DOWNLOAD
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          Role     @default(TEACHER)
+  isActive      Boolean  @default(true)
+  department    String?
+  description   String?
+  driveFolderId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  materialsCreated Material[]
+  assignedMaterials MaterialAssignment[]
+  activities       MaterialActivity[]
+}
+
+model Material {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  subject     String
+  format      String   // e.g. "PDF", "Video", "Document", "Presentation"
+  driveFileId String
+  visibility  Visibility @default(GLOBAL)
+  
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assignments MaterialAssignment[]
+  activities  MaterialActivity[]
+}
+
+model MaterialAssignment {
+  id         String   @id @default(cuid())
+  materialId String
+  teacherId  String
+
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  teacher    User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([materialId, teacherId])
+}
+
+model MaterialActivity {
+  id         String     @id @default(cuid())
+  materialId String
+  teacherId  String?
+  actionType ActionType
+  createdAt  DateTime   @default(now())
+
+  material   Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  teacher    User?      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+}
