@@ -10,7 +10,7 @@ export const uz = {
   allFormats: "Barcha formatlar",
 
   // AppLayout
-  title: "Ta'lim Materiallari Platformasi",
+  title: "Andijon PMM Ta'lim materiallari platformasi",
   dashboard: "Boshqaruv Paneli",
   teachers: "O'qituvchilar",
   materials: "Materiallar",

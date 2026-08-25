@@ -16,8 +16,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Educational Materials Platform",
-  description: "Andizhan Regional Center for Pedagogical Excellence",
+  title: "Andijon viloyati pedagogik mahorat markazi",
+  description: "Andijon viloyati pedagogik mahorat markazi raqamli platformasi",
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
