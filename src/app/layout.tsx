@@ -19,9 +19,9 @@ export const metadata: Metadata = {
   title: "Andijon viloyati pedagogik mahorat markazi",
   description: "Andijon viloyati pedagogik mahorat markazi raqamli platformasi",
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: '/logo.png?v=2',
+    shortcut: '/logo.png?v=2',
+    apple: '/logo.png?v=2',
   }
 };
 
