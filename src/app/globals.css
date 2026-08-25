@@ -12,9 +12,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
+.dark body,
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  background-color: #0b0f17 !important;
+  color: #f1f5f9;
 }
 
 body {

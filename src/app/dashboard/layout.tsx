@@ -11,8 +11,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     redirect("/login");
   }
   
-  const user = await prisma.user.findUnique({ where: { id: session.userId as string } });
+  let user = null;
+  try {
+    user = await prisma.user.findUnique({ 
+      where: { id: session.userId as string },
+      include: { department: { select: { name: true } } }
+    });
+  } catch (err) {
+    console.error("Database connection error in layout:", err);
+  }
   
-  return <AppLayout role={session.role as string} email={user?.email || ""} name={user?.name || ""} department={user?.department || ""}>{children}</AppLayout>;
+  return <AppLayout role={session.role as string} email={user?.email || ""} name={user?.name || ""} department={user?.department?.name || ""}>{children}</AppLayout>;
 }
 

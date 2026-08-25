@@ -1,21 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { createTeacher, updateTeacher, toggleTeacherStatus, deleteTeacher } from "@/app/actions/user";
+import { createDepartment, updateDepartment, toggleDepartmentStatus, deleteDepartment } from "@/app/actions/department";
 import { User } from "@prisma/client";
-import { Plus, Edit, ShieldBan, ShieldCheck, Trash2, Search, FilterX, Mail, Lock, Eye, EyeOff, UserPlus, User as UserIcon, Briefcase, Link2, Info, Check, Loader2, X } from "lucide-react";
+import { Plus, Edit, ShieldBan, ShieldCheck, Trash2, Search, FilterX, Mail, Lock, Eye, EyeOff, Building, Building2, Link2, Info, Check, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useLanguage } from "@/lib/i18n";
 
-export type TeacherWithDepartment = User & { department: { name: string } | null };
-
-export default function TeachersClient({ initialTeachers }: { initialTeachers: TeacherWithDepartment[] }) {
+export default function DepartmentsClient({ initialDepartments }: { initialDepartments: User[] }) {
   const router = useRouter();
-  const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTeacher, setEditingTeacher] = useState<TeacherWithDepartment | null>(null);
-  const [teacherToDelete, setTeacherToDelete] = useState<TeacherWithDepartment | null>(null);
+  const [editingDepartment, setEditingDepartment] = useState<User | null>(null);
+  const [departmentToDelete, setDepartmentToDelete] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -26,12 +22,12 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '?';
   };
 
-  const filteredTeachers = initialTeachers.filter(teacher => {
-    const matchesSearch = teacher.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          teacher.email.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredDepartments = initialDepartments.filter(dep => {
+    const matchesSearch = dep.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          dep.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || 
-                          (statusFilter === 'active' && teacher.isActive) || 
-                          (statusFilter === 'inactive' && !teacher.isActive);
+                          (statusFilter === 'active' && dep.isActive) || 
+                          (statusFilter === 'inactive' && !dep.isActive);
     return matchesSearch && matchesStatus;
   });
 
@@ -45,18 +41,24 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
     e.preventDefault();
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    // Inject id if editing
+    if (editingDepartment) {
+      data.id = editingDepartment.id;
+    }
     
     let res;
-    if (editingTeacher) {
-      res = await updateTeacher(editingTeacher.id, formData);
+    if (editingDepartment) {
+      res = await updateDepartment(data);
     } else {
-      res = await createTeacher(formData);
+      res = await createDepartment(data);
     }
 
     if (res?.error) {
       toast.error(res.error);
     } else {
-      toast.success(editingTeacher ? t('teacherUpdated') : t('teacherCreated'));
+      toast.success(editingDepartment ? "Kafedra ma'lumotlari yangilandi" : "Kafedra muvaffaqiyatli qo'shildi");
       setIsModalOpen(false);
       router.refresh();
     }
@@ -64,20 +66,20 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
   };
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
-    await toggleTeacherStatus(id, !currentStatus);
-    toast.success(t('statusUpdated'));
+    await toggleDepartmentStatus(id, !currentStatus);
+    toast.success("Status o'zgartirildi");
     router.refresh();
   };
 
   const handleDelete = async () => {
-    if (!teacherToDelete) return;
+    if (!departmentToDelete) return;
     setIsDeleting(true);
-    const res = await deleteTeacher(teacherToDelete.id);
+    const res = await deleteDepartment(departmentToDelete.id);
     if (res?.error) {
       toast.error(res.error);
     } else {
-      toast.success(t('teacherDeleted') || "O'qituvchi o'chirildi");
-      setTeacherToDelete(null);
+      toast.success("Kafedra o'chirildi");
+      setDepartmentToDelete(null);
       router.refresh();
     }
     setIsDeleting(false);
@@ -87,16 +89,16 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">{t('teacherManagement')}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">Kafedralar</h1>
           <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
-            {initialTeachers.length} {t('teachers') || "O'qituvchi"}
+            {initialDepartments.length} Kafedra
           </span>
         </div>
         <button 
-          onClick={() => { setEditingTeacher(null); setIsModalOpen(true); }}
+          onClick={() => { setEditingDepartment(null); setIsModalOpen(true); }}
           className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
         >
-          <Plus className="w-5 h-5" /> {t('addTeacher')}
+          <Plus className="w-5 h-5" /> Kafedra qo'shish
         </button>
       </div>
 
@@ -105,7 +107,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input 
             type="text" 
-            placeholder={t('searchTeachers')} 
+            placeholder="Qidirish..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white shadow-sm"
@@ -116,9 +118,9 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-4 py-2.5 bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none cursor-pointer text-gray-900 dark:text-white sm:min-w-[160px] shadow-sm transition-all"
         >
-          <option value="all">{t('statusAll')}</option>
-          <option value="active">{t('active')}</option>
-          <option value="inactive">{t('inactive')}</option>
+          <option value="all">Barchasi</option>
+          <option value="active">Faol</option>
+          <option value="inactive">Nofaol</option>
         </select>
       </div>
 
@@ -128,62 +130,56 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
             <thead>
               <tr className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/80 dark:border-slate-800/80 text-sm">
                 <th className="p-4 font-semibold text-slate-600 dark:text-slate-300 w-12 text-center">№</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">{t('nameField')}</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Kafedra</th>
+                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Nomi</th>
+                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Tavsif</th>
                 <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Qo'shilgan sana</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">{t('statusField')}</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300 text-right">{t('actionsField')}</th>
+                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Status</th>
+                <th className="p-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Amallar</th>
               </tr>
             </thead>
             <tbody>
-              {initialTeachers.length === 0 ? (
+              {initialDepartments.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-12 text-center text-slate-500 dark:text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <ShieldBan className="w-12 h-12 text-slate-300 dark:text-slate-600" />
-                      <p className="text-lg font-medium">{t('noTeachers')}</p>
+                      <p className="text-lg font-medium">Kafedralar mavjud emas</p>
                     </div>
                   </td>
                 </tr>
-              ) : filteredTeachers.length === 0 ? (
+              ) : filteredDepartments.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-12 text-center text-slate-500 dark:text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <FilterX className="w-12 h-12 text-slate-300 dark:text-slate-600" />
-                      <p className="text-lg font-medium">Qidiruv natijasiga ko'ra o'qituvchi topilmadi.</p>
+                      <p className="text-lg font-medium">Qidiruv natijasiga ko'ra kafedra topilmadi.</p>
                     </div>
                   </td>
                 </tr>
               ) : null}
-              {filteredTeachers.map((teacher, index) => (
-                <tr key={teacher.id} className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all group">
+              {filteredDepartments.map((dep, index) => (
+                <tr key={dep.id} className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all group">
                   <td className="p-4 text-center font-medium text-slate-500">{index + 1}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
-                        {getInitials(teacher.name)}
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
+                        {getInitials(dep.name)}
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-slate-100">{teacher.name}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100">{dep.name}</div>
                         <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                           <Mail className="w-3.5 h-3.5" />
-                          {teacher.email}
+                          {dep.email}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 align-middle">
-                    {teacher.department ? (
-                      <span className="inline-flex px-2.5 py-1 text-[11px] uppercase tracking-wider font-semibold bg-slate-100 text-slate-600 dark:bg-[#1E293B]/60 dark:text-slate-300 rounded-md">
-                        {teacher.department.name}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400 text-sm">-</span>
-                    )}
+                  <td className="p-4 align-middle text-sm text-slate-600 dark:text-slate-400">
+                    {dep.description || "-"}
                   </td>
                   <td className="p-4 align-middle">
                     <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-                      {new Date((teacher as any).createdAt || Date.now()).toLocaleDateString("ru-RU", {
+                      {new Date((dep as any).createdAt || Date.now()).toLocaleDateString("ru-RU", {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric'
@@ -191,31 +187,31 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                     </span>
                   </td>
                   <td className="p-4 align-middle">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border ${teacher.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' : 'bg-slate-50 text-slate-600 border-slate-200/60 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${teacher.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
-                      {teacher.isActive ? t('active') : t('inactive')}
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border ${dep.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' : 'bg-slate-50 text-slate-600 border-slate-200/60 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${dep.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                      {dep.isActive ? "Faol" : "Nofaol"}
                     </span>
                   </td>
                   <td className="p-4 align-middle text-right">
                     <div className="flex justify-end gap-1.5 opacity-100">
                       <button 
-                        onClick={() => { setEditingTeacher(teacher); setIsModalOpen(true); }}
+                        onClick={() => { setEditingDepartment(dep); setIsModalOpen(true); }}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-500/10 rounded-xl transition-all"
-                        title={t('editTeacher')}
+                        title="Tahrirlash"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => toggleStatus(teacher.id, teacher.isActive)}
-                        className={`p-2 rounded-xl transition-all ${teacher.isActive ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:text-amber-400 dark:hover:bg-amber-500/10' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/10'}`}
-                        title={teacher.isActive ? t('inactive') : t('active')}
+                        onClick={() => toggleStatus(dep.id, dep.isActive)}
+                        className={`p-2 rounded-xl transition-all ${dep.isActive ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:text-amber-400 dark:hover:bg-amber-500/10' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/10'}`}
+                        title={dep.isActive ? "Bloklash" : "Faollashtirish"}
                       >
-                        {teacher.isActive ? <ShieldBan className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+                        {dep.isActive ? <ShieldBan className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
                       </button>
                       <button 
-                        onClick={() => setTeacherToDelete(teacher)}
+                        onClick={() => setDepartmentToDelete(dep)}
                         className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:text-rose-400 dark:hover:bg-rose-500/10 rounded-xl transition-all"
-                        title={t('delete')}
+                        title="O'chirish"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -234,15 +230,15 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
             {/* Header */}
             <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800/80 flex justify-between items-center bg-slate-50/50 dark:bg-[#111827]/50 sticky top-0 z-10">
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                  <UserPlus className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <Building className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                    {editingTeacher ? t('editTeacher') : "Yangi o'qituvchi qo'shish"}
+                    {editingDepartment ? "Kafedrani tahrirlash" : "Yangi kafedra qo'shish"}
                   </h2>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    {editingTeacher ? "O'qituvchi ma'lumotlarini tahrirlash" : "Tizimga yangi o'qituvchi ma'lumotlarini kiriting va parolni biriktiring"}
+                    {editingDepartment ? "Kafedra ma'lumotlarini tahrirlash" : "Tizimga yangi kafedra qo'shish"}
                   </p>
                 </div>
               </div>
@@ -259,15 +255,15 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('nameField')} <span className="text-red-500">*</span>
+                    Kafedra nomi <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     <input
                       required
                       name="name"
-                      defaultValue={editingTeacher?.name}
-                      placeholder="O'qituvchining to'liq ismi (masalan: Alisher Xalilov)"
+                      defaultValue={editingDepartment?.name}
+                      placeholder="Kafedra nomi (masalan: Jarrohlik)"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
@@ -276,7 +272,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('emailField')} <span className="text-red-500">*</span>
+                    Elektron pochta / Login <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -284,8 +280,8 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                       required
                       type="email"
                       name="email"
-                      defaultValue={editingTeacher?.email}
-                      placeholder="email@example.com"
+                      defaultValue={editingDepartment?.email}
+                      placeholder="kafedra@example.com"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
@@ -294,14 +290,14 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                 {/* Password */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {editingTeacher ? t('passwordLeaveBlank') : t('password')} {editingTeacher ? '' : <span className="text-red-500">*</span>}
+                    {editingDepartment ? "Yangi parol (o'zgartirish uchun)" : "Parol"} {editingDepartment ? '' : <span className="text-red-500">*</span>}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     <input
                       type={showPassword ? "text" : "password"}
                       name="password"
-                      required={!editingTeacher}
+                      required={!editingDepartment}
                       minLength={6}
                       placeholder="••••••••"
                       className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
@@ -317,18 +313,18 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                   </div>
                 </div>
 
-                {/* Department / Description */}
+                {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('departmentDescription')}
+                    Tavsif
                   </label>
                   <div className="relative">
-                    <Briefcase className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <Info className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
                     <textarea
                       name="description"
                       rows={2}
-                      defaultValue={editingTeacher?.description || ""}
-                      placeholder="Kafedra yoki mutaxassislik nomi"
+                      defaultValue={editingDepartment?.description || ""}
+                      placeholder="Kafedra haqida qo'shimcha ma'lumotlar"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 custom-scrollbar resize-none"
                     />
                   </div>
@@ -337,14 +333,14 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                 {/* Drive Folder */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('driveFolderLink')}
+                    Google Drive Jildi
                   </label>
                   <div className="relative">
                     <Link2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     <input
                       type="text"
                       name="driveFolderId"
-                      defaultValue={editingTeacher?.driveFolderId || ""}
+                      defaultValue={editingDepartment?.driveFolderId || ""}
                       onChange={(e) => e.target.value = extractDriveId(e.target.value)}
                       placeholder="https://drive.google.com/drive/folders/..."
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
@@ -353,7 +349,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                   <div className="flex items-start gap-2 mt-2">
                     <Info className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      O'qituvchining shaxsiy Google Drive jildiga havola
+                      Ushbu kafedra uchun ajratilgan Google Drive jildi havolasi
                     </p>
                   </div>
                 </div>
@@ -367,7 +363,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                   disabled={isSubmitting}
                   className="px-5 py-2.5 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors disabled:opacity-50"
                 >
-                  {t('cancel')}
+                  Bekor qilish
                 </button>
                 <button
                   type="submit"
@@ -378,7 +374,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      <Check className="w-4 h-4" /> {t('save')}
+                      <Check className="w-4 h-4" /> Saqlash
                     </>
                   )}
                 </button>
@@ -389,27 +385,26 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
       )}
 
       {/* Delete Confirmation Modal */}
-      {teacherToDelete && (
+      {departmentToDelete && (
         <div className="fixed inset-0 bg-black/50 dark:bg-[#0B0F17]/70 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-[#111827]/90 rounded-t-2xl sm:rounded-xl p-6 w-full max-w-md shadow-lg border border-slate-200 dark:border-slate-800 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300">
-            {/* Mobile Drag Handle */}
-            <div className="w-full flex justify-center pb-4 sm:hidden cursor-grab" onClick={() => setTeacherToDelete(null)}>
+            <div className="w-full flex justify-center pb-4 sm:hidden cursor-grab" onClick={() => setDepartmentToDelete(null)}>
               <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
             </div>
             <h2 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
-              {t('deleteTeacherTitle')}
+              Kafedrani o'chirish
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {t('deleteTeacherMessage')}
+              Haqiqatan ham ushbu kafedrani o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.
             </p>
             <div className="flex justify-end gap-3">
               <button 
                 type="button" 
-                onClick={() => setTeacherToDelete(null)}
+                onClick={() => setDepartmentToDelete(null)}
                 disabled={isDeleting}
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-medium disabled:opacity-50"
               >
-                {t('cancel')}
+                Bekor qilish
               </button>
               <button 
                 onClick={handleDelete}
@@ -419,7 +414,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                 {isDeleting ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : (
-                  t('confirmDeleteTeacher')
+                  "O'chirish"
                 )}
               </button>
             </div>

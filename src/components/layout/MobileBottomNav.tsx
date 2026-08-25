@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FileText, Settings, Grid } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Settings, Grid, Building } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
 export default function MobileBottomNav({ role }: { role: string }) {
@@ -13,6 +13,7 @@ export default function MobileBottomNav({ role }: { role: string }) {
     { href: "/admin", icon: LayoutDashboard, label: t("dashboard") },
     { href: "/admin/teachers", icon: Users, label: t("teachers") },
     { href: "/admin/materials", icon: FileText, label: t("materials") },
+    { href: "/admin/departments", icon: Building, label: "Kafedralar" },
     { href: "/admin/settings", icon: Settings, label: t("settings") },
   ];
 
@@ -25,7 +26,7 @@ export default function MobileBottomNav({ role }: { role: string }) {
   if (!links || links.length === 0) return null;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800/80 transition-colors">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#0D131F]/90 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800/70 transition-colors">
       <div className="flex justify-around items-center h-16 pb-safe">
         {links.map((link) => {
           const Icon = link.icon;

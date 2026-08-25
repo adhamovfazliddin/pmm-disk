@@ -7,13 +7,13 @@ import DashboardClient from "./DashboardClient";
 export default async function DashboardPage() {
   const session = (await getSession()) as { userId: string; role: string; name: string; email: string } | null;
   
-  if (!session || session.role !== "TEACHER") {
+  if (!session || (session.role !== "TEACHER" && session.role !== "DEPARTMENT")) {
     redirect("/login");
   }
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { name: true, description: true, driveFolderId: true }
+    select: { name: true, description: true, driveFolderId: true, departmentId: true, role: true }
   });
 
   if (!user) {
@@ -24,7 +24,8 @@ export default async function DashboardPage() {
     where: {
       OR: [
         { visibility: "GLOBAL" },
-        { assignments: { some: { teacherId: session.userId } } }
+        { assignments: { some: { teacherId: session.userId } } },
+        ...(user.departmentId ? [{ assignments: { some: { teacherId: user.departmentId } } }] : [])
       ]
     },
     orderBy: { createdAt: "desc" },

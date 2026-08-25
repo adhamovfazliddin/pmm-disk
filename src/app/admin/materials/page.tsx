@@ -8,16 +8,19 @@ export default async function MaterialsPage() {
     include: {
       createdBy: { select: { name: true } },
       assignments: {
-        include: { teacher: { select: { id: true, name: true, email: true } } }
+        include: { teacher: { select: { id: true, name: true, email: true, role: true } } }
       }
     }
   });
 
-  const teachers = await prisma.user.findMany({
-    where: { role: "TEACHER", isActive: true },
-    select: { id: true, name: true, email: true },
+  const assignees = await prisma.user.findMany({
+    where: { 
+      role: { in: ["TEACHER", "DEPARTMENT"] }, 
+      isActive: true 
+    },
+    select: { id: true, name: true, email: true, role: true },
+    orderBy: { name: 'asc' }
   });
 
-  return <MaterialsClient initialMaterials={materials} activeTeachers={teachers} />;
+  return <MaterialsClient initialMaterials={materials} activeAssignees={assignees} />;
 }
-

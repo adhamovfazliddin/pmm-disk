@@ -50,7 +50,7 @@ export default function LoginPage() {
   }, [state]);
 
   return (
-    <div className="min-h-screen h-full w-full overflow-hidden grid grid-cols-1 lg:grid-cols-2 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+    <div className="min-h-screen h-full w-full overflow-hidden grid grid-cols-1 lg:grid-cols-2 bg-slate-50 dark:bg-[#0B0F17] transition-colors duration-200">
       
       {/* Left Branding Hero - Hidden on Mobile */}
       <div className="hidden lg:flex relative flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-800 via-indigo-900 to-slate-950 p-12 text-white border-r border-slate-200 dark:border-slate-800/80 shadow-2xl">
@@ -156,7 +156,7 @@ export default function LoginPage() {
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
           
           <div className="lg:hidden flex justify-center mb-8">
-            <div className="bg-white dark:bg-slate-800 p-2.5 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-[#1E293B]/60 p-2.5 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700/60">
               <Image src="/logo.png" alt="Logo" width={64} height={64} className="rounded-xl object-contain" />
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   required
                   placeholder="admin@example.com"
-                  className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm placeholder-slate-400 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all sm:text-sm font-medium"
+                  className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-[#0B0F17]/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm placeholder-slate-400 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all sm:text-sm font-medium"
                 />
               </div>
             </div>
@@ -206,7 +206,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   required
                   placeholder="••••••••"
-                  className="block w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm placeholder-slate-400 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all sm:text-sm font-medium"
+                  className="block w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-[#0B0F17]/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm placeholder-slate-400 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all sm:text-sm font-medium"
                 />
                 <button
                   type="button"

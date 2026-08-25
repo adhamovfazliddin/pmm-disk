@@ -4,11 +4,15 @@ import { useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 import { updateAdminProfile } from "@/app/actions/auth";
 import { toast } from "sonner";
+import { Mail, Lock, Shield, Save, User, Eye, EyeOff } from "lucide-react";
 
 export default function SettingsClient({ currentEmail }: { currentEmail: string }) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -36,76 +40,140 @@ export default function SettingsClient({ currentEmail }: { currentEmail: string 
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">{t('adminSettings')}</h1>
+    <div className="max-w-3xl mx-auto space-y-8">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">{t('adminSettings')}</h1>
+        <p className="text-slate-500 dark:text-slate-400">Shaxsiy ma'lumotlar va xavfsizlik sozlamalarini boshqarish</p>
+      </div>
 
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('email')}</label>
-            <input 
-              type="email" 
-              name="newEmail"
-              defaultValue={currentEmail}
-              className={`w-full border ${fieldErrors.newEmail ? 'border-red-500' : 'border-slate-300 dark:border-slate-700'} bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none`} 
-            />
-            {fieldErrors.newEmail && <p className="text-red-500 text-xs mt-1">{fieldErrors.newEmail.join(", ")}</p>}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Account Details Card */}
+        <div className="bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 transition-colors">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400">
+              <User className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Akkaunt ma'lumotlari</h3>
           </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('email')}</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input 
+                  type="email" 
+                  name="newEmail"
+                  defaultValue={currentEmail}
+                  className={`w-full pl-10 pr-4 py-2.5 border ${fieldErrors.newEmail ? 'border-red-500' : 'border-slate-300 dark:border-slate-700/60'} bg-slate-50/50 dark:bg-[#1E293B]/60 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all`} 
+                />
+              </div>
+              {fieldErrors.newEmail && <p className="text-red-500 text-xs mt-1.5">{fieldErrors.newEmail.join(", ")}</p>}
+            </div>
+          </div>
+        </div>
 
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-            <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4">Xavfsizlik</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('currentPassword')} <span className="text-red-500">*</span></label>
+        {/* Security Card */}
+        <div className="bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 transition-colors">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400">
+              <Shield className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Xavfsizlik</h3>
+          </div>
+          
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('currentPassword')} <span className="text-rose-500">*</span></label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
                 <input 
                   required
-                  type="password" 
+                  type={showCurrentPassword ? "text" : "password"}
                   name="currentPassword"
                   placeholder="Tasdiqlash uchun joriy parolni kiriting"
-                  className={`w-full border ${fieldErrors.currentPassword ? 'border-red-500' : 'border-slate-300 dark:border-slate-700'} bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none`} 
+                  className={`w-full pl-10 pr-10 py-2.5 border ${fieldErrors.currentPassword ? 'border-red-500' : 'border-slate-300 dark:border-slate-700/60'} bg-slate-50/50 dark:bg-[#1E293B]/60 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all`} 
                 />
-                {fieldErrors.currentPassword && <p className="text-red-500 text-xs mt-1">{fieldErrors.currentPassword.join(", ")}</p>}
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              {fieldErrors.currentPassword && <p className="text-red-500 text-xs mt-1.5">{fieldErrors.currentPassword.join(", ")}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('newPassword')}</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                  <input 
+                    type={showNewPassword ? "text" : "password"}
+                    name="newPassword"
+                    placeholder="Yangi parolni kiriting"
+                    className={`w-full pl-10 pr-10 py-2.5 border ${fieldErrors.newPassword ? 'border-red-500' : 'border-slate-300 dark:border-slate-700/60'} bg-slate-50/50 dark:bg-[#1E293B]/60 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all`} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {fieldErrors.newPassword && <p className="text-red-500 text-xs mt-1.5">{fieldErrors.newPassword.join(", ")}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('newPassword')}</label>
-                <input 
-                  type="password" 
-                  name="newPassword"
-                  className={`w-full border ${fieldErrors.newPassword ? 'border-red-500' : 'border-slate-300 dark:border-slate-700'} bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none`} 
-                />
-                {fieldErrors.newPassword && <p className="text-red-500 text-xs mt-1">{fieldErrors.newPassword.join(", ")}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('confirmPassword')}</label>
-                <input 
-                  type="password" 
-                  name="confirmPassword"
-                  className={`w-full border ${fieldErrors.confirmPassword ? 'border-red-500' : 'border-slate-300 dark:border-slate-700'} bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none`} 
-                />
-                {fieldErrors.confirmPassword && <p className="text-red-500 text-xs mt-1">{fieldErrors.confirmPassword.join(", ")}</p>}
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('confirmPassword')}</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="Yangi parolni takrorlang"
+                    className={`w-full pl-10 pr-10 py-2.5 border ${fieldErrors.confirmPassword ? 'border-red-500' : 'border-slate-300 dark:border-slate-700/60'} bg-slate-50/50 dark:bg-[#1E293B]/60 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all`} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {fieldErrors.confirmPassword && <p className="text-red-500 text-xs mt-1.5">{fieldErrors.confirmPassword.join(", ")}</p>}
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="pt-4 flex justify-end">
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  {t('save')}...
-                </span>
-              ) : t('save')}
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="flex justify-end pt-2">
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 hover:shadow-md disabled:opacity-50 transition-all"
+          >
+            {loading ? (
+              <>
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span>{t('save')}...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                <span>{t('save')}</span>
+              </>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

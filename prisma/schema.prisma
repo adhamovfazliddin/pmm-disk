@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   SUPERADMIN
   TEACHER
+  DEPARTMENT
 }
 
 enum Visibility {
@@ -29,7 +30,9 @@ model User {
   name          String
   role          Role     @default(TEACHER)
   isActive      Boolean  @default(true)
-  department    String?
+  departmentId  String?
+  department    User?    @relation("TeacherDepartment", fields: [departmentId], references: [id])
+  teachers      User[]   @relation("TeacherDepartment")
   description   String?
   driveFolderId String?
   createdAt     DateTime @default(now())

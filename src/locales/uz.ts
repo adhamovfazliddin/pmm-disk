@@ -119,7 +119,9 @@ export const uz = {
 
   // Modal
   fullScreen: "To'liq ekran",
-  exitFullScreen: "Ekranni kichraytirish",
+  exitFullScreen: "To'liq ekrandan chiqish",
   close: "Yopish",
-  previewFallback: "Ushbu formatni oldindan ko'rib bo'lmaydi. Uni to'g'ridan-to'g'ri yuklab oling.",
+  previewFallback: "Ushbu format uchun oldindan ko'rish mavjud emas. Iltimos, uni to'g'ridan-to'g'ri yuklab oling.",
+
+
 };

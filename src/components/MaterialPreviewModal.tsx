@@ -50,7 +50,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
       <div 
-        className={`bg-white dark:bg-slate-900 w-full sm:max-w-5xl h-[90vh] sm:h-[85vh] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 ${
+        className={`bg-white dark:bg-[#111827]/90 w-full sm:max-w-5xl h-[90vh] sm:h-[85vh] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 ${
           isFullScreen ? "fixed inset-0 !h-full !max-w-none !rounded-none" : ""
         }`}
       >
@@ -60,9 +60,9 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#111827]/90">
           <div className="flex items-center gap-3 overflow-hidden pr-4">
-            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 shrink-0">
+            <div className="p-2 bg-white dark:bg-[#1E293B]/60 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700/60 shrink-0">
               {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <File className="w-6 h-6 text-gray-500" />}
             </div>
             <div className="flex flex-col overflow-hidden">
@@ -106,7 +106,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 bg-slate-100 dark:bg-slate-950 relative overflow-hidden">
+        <div className="flex-1 bg-slate-100 dark:bg-[#0B0F17] relative overflow-hidden">
           {canPreview ? (
             <iframe 
               src={previewUrl}
@@ -116,7 +116,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
             ></iframe>
           ) : (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-              <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm mb-6 border border-slate-200 dark:border-slate-700">
+              <div className="p-6 bg-white dark:bg-[#1E293B]/60 rounded-2xl shadow-sm mb-6 border border-slate-200 dark:border-slate-700/60">
                 {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <File className="w-16 h-16 text-gray-400" />}
               </div>
               <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{material.title}</h3>

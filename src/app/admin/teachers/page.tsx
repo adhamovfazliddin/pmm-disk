@@ -5,6 +5,7 @@ import TeachersClient from "./TeachersClient";
 export default async function TeachersPage() {
   const teachers = await prisma.user.findMany({
     where: { role: "TEACHER" },
+    include: { department: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
   });
 

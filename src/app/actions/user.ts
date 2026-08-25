@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { Role } from "@prisma/client";
@@ -11,7 +11,7 @@ const userSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1),
   password: z.string().min(6).optional(),
-  department: z.string().optional().nullable(),
+  departmentId: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   driveFolderId: z.string().optional().nullable(),
 });
@@ -40,7 +40,7 @@ export async function createTeacher(formData: FormData) {
         name: parsed.data.name,
         password: hashedPassword,
         role: Role.TEACHER,
-        department: parsed.data.department,
+        departmentId: parsed.data.departmentId,
         description: parsed.data.description,
         driveFolderId: parsed.data.driveFolderId,
       }
@@ -68,7 +68,7 @@ export async function updateTeacher(id: string, formData: FormData) {
   const updateData: Record<string, unknown> = {
     email: parsed.data.email,
     name: parsed.data.name,
-    department: parsed.data.department,
+    departmentId: parsed.data.departmentId,
     description: parsed.data.description,
     driveFolderId: parsed.data.driveFolderId,
   };

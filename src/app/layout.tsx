@@ -32,10 +32,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-slate-50 text-slate-900 dark:bg-[#0B1120] dark:text-slate-100 transition-colors duration-200">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-slate-50 text-slate-900 dark:bg-[#0B0F17] dark:text-slate-100 transition-colors duration-200 relative">
+        {/* Ambient soft glow at the top */}
+        <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-blue-50/80 via-slate-50/20 to-transparent pointer-events-none dark:hidden z-0" />
         <NextTopLoader color="#3b82f6" height={3} showSpinner={false} shadow="0 0 10px #3b82f6,0 0 5px #3b82f6" />
         <Providers>
-          {children}
+          <div className="relative z-10 flex flex-col flex-1">
+            {children}
+          </div>
           <Toaster position="top-right" richColors closeButton />
         </Providers>
       </body>
