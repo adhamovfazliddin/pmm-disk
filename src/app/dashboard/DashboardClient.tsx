@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Link as LinkIcon, Plus, X, Globe } from "lucide-react";
-import { getDrivePreviewUrl, extractDriveId } from "@/lib/drive";
+import { getDrivePreviewUrl, extractDriveId, extractDriveFolderId } from "@/lib/drive";
 
 import { addGlobalResourceAction } from "@/app/actions/resource";
 
@@ -46,7 +46,7 @@ interface Material {
 
 export function getDriveFolderEmbedUrl(urlOrId: string | null | undefined): string | null {
   if (!urlOrId) return null;
-  const folderId = extractDriveId(urlOrId) || urlOrId;
+  const folderId = extractDriveFolderId(urlOrId) || urlOrId;
   return `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
 }
 
@@ -113,8 +113,7 @@ export default function DashboardClient({
         setIsLoadingDrive(true);
         setDriveError("");
         try {
-          const sanitizedFolderId = driveFolderId.trim().replace(/^.*\/folders\//, '').split('?')[0];
-          const folderId = extractDriveId(sanitizedFolderId) || sanitizedFolderId;
+          const folderId = extractDriveFolderId(driveFolderId);
           const files = await fetchDriveFiles(folderId);
           setDriveFiles(files);
         } catch (error) {

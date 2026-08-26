@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/session";
-import { extractDriveId } from "@/lib/drive";
+import { extractDriveFolderId } from "@/lib/drive";
 import bcrypt from "bcryptjs";
 
 const departmentSchema = z.object({
@@ -33,7 +33,7 @@ export async function createDepartment(data: unknown) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   
-  const driveId = driveFolderId ? extractDriveId(driveFolderId) : null;
+  const driveId = driveFolderId ? extractDriveFolderId(driveFolderId) : null;
 
   try {
     await prisma.user.create({
@@ -75,7 +75,7 @@ export async function updateDepartment(data: unknown) {
     name,
     email,
     description,
-    driveFolderId: driveFolderId ? extractDriveId(driveFolderId) : null,
+    driveFolderId: driveFolderId ? extractDriveFolderId(driveFolderId) : null,
   };
 
   if (password && password.trim() !== "") {

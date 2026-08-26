@@ -21,3 +21,22 @@ export function getDrivePreviewUrl(fileId: string): string {
 export function getDriveDownloadUrl(fileId: string): string {
   return `https://drive.google.com/uc?export=download&id=${fileId}`;
 }
+
+export function extractDriveFolderId(input: string): string {
+  if (!input) return "";
+  const trimmed = input.trim();
+  
+  // Match folder ID from various Google Drive URL formats
+  const match = trimmed.match(/(?:folders\/|id=)([-\w]{25,})/);
+  if (match) {
+    return match[1];
+  }
+
+  // If it's already just an ID with potential query params attached
+  const rawMatch = trimmed.match(/^([-\w]{25,})/);
+  if (rawMatch) {
+    return rawMatch[1];
+  }
+
+  return trimmed;
+}
