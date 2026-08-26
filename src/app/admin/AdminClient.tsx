@@ -1,17 +1,9 @@
 "use client";
 
-import { Users, FileText, Globe, Lock, Eye, Download, Activity, Briefcase, Calendar, FileBadge, Pencil, Trash2 } from "lucide-react";
+import { Users, FileText, Globe, Lock, Eye, Download, Activity, Briefcase, Calendar, FileBadge, Pencil, Trash2, Video, ExternalLink, Plus, X, Link as LinkIcon, PlayCircle, BookOpen } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import Link from "next/link";
-
-const FORMAT_COLORS: Record<string, string> = {
-  PDF: "from-red-500 to-red-600",
-  PPTX: "from-orange-500 to-orange-600",
-  DOCX: "from-blue-500 to-blue-600",
-  VIDEO: "from-purple-500 to-purple-600",
-  MP4: "from-purple-500 to-purple-600",
-  TXT: "from-gray-500 to-gray-600"
-};
+import { useState } from "react";
 
 function SubjectBarChart({ data, t }: { data: any[], t: any }) {
   const max = data.length > 0 ? Math.max(...data.map(d => d.count), 1) : 1;
@@ -41,6 +33,17 @@ function SubjectBarChart({ data, t }: { data: any[], t: any }) {
     </div>
   );
 }
+
+const FORMAT_COLORS: Record<string, string> = {
+  PDF: "from-red-500 to-red-600",
+  PRESENTATION: "from-orange-500 to-orange-600",
+  VIDEO: "from-blue-500 to-blue-600",
+  DOCUMENT: "from-blue-400 to-blue-500",
+  SPREADSHEET: "from-emerald-500 to-emerald-600",
+  IMAGE: "from-purple-500 to-purple-600",
+  ARCHIVE: "from-gray-500 to-gray-600",
+  OTHER: "from-slate-500 to-slate-600"
+};
 
 function FormatDistributionChart({ data, t }: { data: any[], t: any }) {
   const total = data?.reduce((sum, item) => sum + item.count, 0) || 1;
@@ -110,6 +113,9 @@ export default function AdminClient({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">{t('adminDashboard')}</h1>
         <div className="flex items-center gap-3">
+          <Link href="/admin/resources" className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-all shadow-sm shadow-emerald-500/20">
+            <BookOpen className="w-4 h-4" /> Resurslar
+          </Link>
           <Link href="/admin/materials" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-all shadow-sm shadow-blue-500/20">
             <span className="text-lg leading-none">+</span> Material qo'shish
           </Link>
@@ -262,7 +268,7 @@ export default function AdminClient({
       </div>
 
       {analytics && (
-        <>
+        <div className="mt-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-10 mb-6">{t('analyticsTitle')}</h2>
 
           {analytics.subjectDistribution && analytics.formatDistribution && (
@@ -335,7 +341,7 @@ export default function AdminClient({
               </table>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

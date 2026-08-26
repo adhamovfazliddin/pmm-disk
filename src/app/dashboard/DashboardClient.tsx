@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder } from "lucide-react";
-import { getDrivePreviewUrl } from "@/lib/drive";
+import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Link as LinkIcon, Plus, X, Globe } from "lucide-react";
+import { getDrivePreviewUrl, extractDriveId } from "@/lib/drive";
+
+import { addGlobalResourceAction } from "@/app/actions/resource";
+
 import { useLanguage } from "@/lib/i18n";
 import { recordMaterialActivity } from "@/app/actions/analytics";
 import { fetchDriveFiles, DriveFile } from "@/app/actions/drive";
@@ -43,9 +46,7 @@ interface Material {
 
 export function getDriveFolderEmbedUrl(urlOrId: string | null | undefined): string | null {
   if (!urlOrId) return null;
-  // Match folder ID from standard sharing URL or raw ID
-  const match = urlOrId.match(/folders\/([a-zA-Z0-9_-]+)/) || urlOrId.match(/^([a-zA-Z0-9_-]+)$/);
-  const folderId = match ? match[1] : urlOrId;
+  const folderId = extractDriveId(urlOrId) || urlOrId;
   return `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
 }
 
@@ -55,16 +56,30 @@ export const getFullDriveUrl = (urlOrId?: string | null) => {
   return `https://drive.google.com/drive/folders/${urlOrId}`;
 };
 
+export function getYouTubeEmbedUrl(url: string): string | null {
+  if (!url) return null;
+  // Match youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID, youtube.com/v/ID
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+
+  if (match && match[2].length === 11) {
+    return `https://www.youtube.com/embed/${match[2]}`;
+  }
+  return null;
+}
+
 export default function DashboardClient({ 
   initialMaterials, 
   sessionName,
   description,
-  driveFolderId
+  driveFolderId,
+  initialGlobalResources
 }: { 
   initialMaterials: Material[], 
   sessionName: string,
   description?: string | null,
-  driveFolderId?: string | null
+  driveFolderId?: string | null,
+  initialGlobalResources?: any[]
 }) {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,17 +89,29 @@ export default function DashboardClient({
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
-  const [activeTab, setActiveTab] = useState<"drive" | "platform">(driveFolderId ? "drive" : "platform");
+  const [activeTab, setActiveTab] = useState<"drive" | "platform" | "resources">(driveFolderId ? "drive" : "platform");
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [isLoadingDrive, setIsLoadingDrive] = useState(false);
   const [driveError, setDriveError] = useState("");
+  
+  const [localResources, setLocalResources] = useState(initialGlobalResources || []);
+  const [resourceSearch, setResourceSearch] = useState("");
+  const [resourceFilter, setResourceFilter] = useState("ALL");
+  const [resourceViewMode, setResourceViewMode] = useState<"grid" | "list">("grid");
+
+  const filteredLocalResources = localResources.filter(resource => {
+    const matchesSearch = resource.title.toLowerCase().includes(resourceSearch.toLowerCase()) || 
+                          (resource.description || "").toLowerCase().includes(resourceSearch.toLowerCase());
+    const matchesFilter = resourceFilter === "ALL" || resource.type === resourceFilter;
+    return matchesSearch && matchesFilter;
+  });
 
   useEffect(() => {
     if (driveFolderId && activeTab === "drive" && driveFiles.length === 0) {
       const loadDriveFiles = async () => {
         setIsLoadingDrive(true);
         try {
-          const folderId = driveFolderId.match(/folders\/([a-zA-Z0-9_-]+)/)?.[1] || driveFolderId;
+          const folderId = extractDriveId(driveFolderId) || driveFolderId;
           const files = await fetchDriveFiles(folderId);
           setDriveFiles(files);
         } catch (error) {
@@ -192,8 +219,8 @@ export default function DashboardClient({
       </div>
 
       {/* Tab Switcher */}
-      {driveFolderId && (
-        <div className="flex bg-slate-100/50 dark:bg-[#1E293B]/60 p-1 rounded-xl w-fit border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+      <div className="flex flex-wrap gap-2 bg-slate-100/50 dark:bg-[#1E293B]/60 p-1 rounded-xl w-fit border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+        {driveFolderId && (
           <button
             onClick={() => setActiveTab("drive")}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -204,21 +231,225 @@ export default function DashboardClient({
           >
             📁 Kafedra Drive Jildi
           </button>
-          <button
-            onClick={() => setActiveTab("platform")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              activeTab === "platform"
-                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
-            }`}
-          >
-            📚 Platforma Materiallari
-          </button>
+        )}
+        <button
+          onClick={() => setActiveTab("platform")}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            activeTab === "platform"
+              ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+          }`}
+        >
+          📚 Platforma Materiallari
+        </button>
+        <button
+          onClick={() => setActiveTab("resources")}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            activeTab === "resources"
+              ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+          }`}
+        >
+          🎓 Foydali Resurslar / Video Darslar
+        </button>
+      </div>
+
+      {activeTab === "resources" && (
+        <div className="space-y-6">
+          {/* Header & Quick Filter Toolbar */}
+          <div className="flex flex-col md:flex-row gap-4 bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 transition-colors">
+            <div className="flex items-center justify-between md:w-auto md:pr-4 md:border-r border-slate-200 dark:border-slate-800">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-blue-500" /> Foydali Resurslar
+              </h2>
+              <span className="ml-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 py-0.5 px-2.5 rounded-full text-xs font-semibold">
+                {filteredLocalResources.length}
+              </span>
+            </div>
+            
+            <div className="flex-1 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center w-full">
+              <div className="relative flex-1 w-full max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Resurslarni qidirish..."
+                  value={resourceSearch}
+                  onChange={(e) => setResourceSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-700/60 bg-slate-50/50 dark:bg-[#1E293B]/60 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+                />
+              </div>
+
+              <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-[#1E293B]/60 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+                  {[{id: "ALL", label: "Barchasi"}, {id: "video", label: "🎬 Video Darslar"}, {id: "link", label: "🌐 Foydali Linklar"}].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setResourceFilter(tab.id)}
+                      className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${resourceFilter === tab.id ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#1E293B]/60 p-1 rounded-lg border border-slate-200 dark:border-slate-700/60 shrink-0">
+                  <button
+                    onClick={() => setResourceViewMode('grid')}
+                    className={`p-1.5 rounded-md transition-colors ${resourceViewMode === 'grid' ? 'bg-white dark:bg-slate-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setResourceViewMode('list')}
+                    className={`p-1.5 rounded-md transition-colors ${resourceViewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {filteredLocalResources.length === 0 ? (
+            <div className="py-20 flex flex-col items-center justify-center text-center bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800/80 transition-colors">
+              <div className="w-20 h-20 mb-5 rounded-full bg-slate-50 dark:bg-[#1E293B]/60 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                <Search className="w-10 h-10 text-slate-300 dark:text-slate-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Resurslar topilmadi</h3>
+              <p className="text-gray-500 dark:text-gray-400 max-w-md">
+                Qidiruv so'rovingiz bo'yicha hech qanday resurs topilmadi yoki hali resurslar qo'shilmagan. Boshqa kalit so'z bilan qidirib ko'ring.
+              </p>
+            </div>
+          ) : (
+            <div className={resourceViewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+              {filteredLocalResources.map((resource) => (
+                <div key={resource.id} className={`backdrop-blur-md bg-white/90 dark:bg-[#111827]/90 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-xl ${resourceViewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col h-full'}`}>
+                  
+                  {/* Thumbnail Section */}
+                  <div className={`${resourceViewMode === 'list' ? 'w-full sm:w-64 sm:h-auto border-r border-slate-100 dark:border-slate-800/50' : 'w-full aspect-video border-b border-slate-100 dark:border-slate-800/50'} relative bg-slate-900 shrink-0`}>
+                    {resource.type === "video" ? (
+                      getYouTubeEmbedUrl(resource.url) ? (
+                        <iframe 
+                          className="absolute inset-0 w-full h-full"
+                          src={getYouTubeEmbedUrl(resource.url)!} 
+                          title={resource.title} 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-300 p-4">
+                          <PlayCircle className="w-10 h-10 mb-2 opacity-50" />
+                          <span className="text-xs font-medium text-center mb-2">Video formatini bu yerda ko'rsatib bo'lmaydi</span>
+                        </div>
+                      )
+                    ) : (
+                      <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-900/20 dark:to-indigo-900/20 flex flex-col items-center justify-center">
+                        <div className="w-14 h-14 bg-white/80 dark:bg-[#1E293B]/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm mb-2">
+                          <Globe className="w-7 h-7 text-blue-500" />
+                        </div>
+                        {(() => {
+                          try {
+                            return <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-white/60 dark:bg-black/20 px-2 py-0.5 rounded-full">{new URL(resource.url).hostname.replace('www.','')}</span>;
+                          } catch {
+                            return null;
+                          }
+                        })()}
+                      </div>
+                    )}
+                    
+                    {/* Badge Overlay */}
+                    <div className="absolute top-3 left-3">
+                      <span className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border backdrop-blur-md shadow-sm flex items-center gap-1.5 ${
+                        resource.type === 'video' 
+                          ? 'bg-red-500/90 text-white border-red-400/50'
+                          : 'bg-blue-500/90 text-white border-blue-400/50'
+                      }`}>
+                        {resource.type === 'video' ? <Video className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
+                        {resource.category || (resource.type === 'video' ? 'Video Dars' : 'Foydali Link')}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Content Section */}
+                  <div className={`p-5 flex-1 flex flex-col ${resourceViewMode === 'list' ? 'justify-center' : ''}`}>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 leading-snug">
+                      {resource.title}
+                    </h3>
+                    
+                    <p className={`text-gray-600 dark:text-gray-400 text-sm ${resourceViewMode === 'list' ? 'mb-0 line-clamp-2' : 'mb-5 line-clamp-3'}`}>
+                      {resource.description}
+                    </p>
+                    
+                    {resourceViewMode === 'grid' && (
+                      <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                        {resource.type === 'video' && !getYouTubeEmbedUrl(resource.url) ? (
+                          <a 
+                            href={resource.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                          >
+                            <Video className="w-4 h-4" /> YouTube'da ko'rish ↗
+                          </a>
+                        ) : resource.type === 'video' ? (
+                          <a 
+                            href={resource.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                          >
+                            YouTube'da ochish <ExternalLink className="w-4 h-4" />
+                          </a>
+                        ) : (
+                          <a 
+                            href={resource.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                          >
+                            Veb-saytga o'tish ↗
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* List View Action Button (Right Aligned) */}
+                  {resourceViewMode === 'list' && (
+                    <div className="p-5 sm:pl-0 flex flex-col justify-center sm:border-l border-slate-100 dark:border-slate-800/50 sm:ml-5 shrink-0 sm:w-48">
+                        {resource.type === 'video' ? (
+                          <a 
+                            href={resource.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full flex flex-col items-center justify-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-center"
+                          >
+                            <PlayCircle className="w-5 h-5 text-red-500" /> Videoni ko'rish ▶
+                          </a>
+                        ) : (
+                          <a 
+                            href={resource.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full flex flex-col items-center justify-center gap-2 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-center"
+                          >
+                            <ExternalLink className="w-5 h-5 text-blue-500" /> Saytga o'tish ↗
+                          </a>
+                        )}
+                    </div>
+                  )}
+
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Platform Materials & Drive Materials (Unified UI) */}
-      <div className="flex flex-col md:flex-row gap-4 bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 transition-colors">
+      {activeTab !== "resources" && (
+        <>
+          <div className="flex flex-col md:flex-row gap-4 bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 transition-colors">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
@@ -442,6 +673,9 @@ export default function DashboardClient({
           </div>
         </div>
       )}
+      
+        </>
+      )}
 
       <MaterialPreviewModal
         material={selectedMaterial}
@@ -452,6 +686,7 @@ export default function DashboardClient({
           setTimeout(() => setSelectedMaterial(null), 300);
         }}
       />
+
     </div>
   );
 }

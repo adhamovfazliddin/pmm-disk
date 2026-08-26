@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LogOut, LayoutDashboard, Users, FileText, Sun, Moon, Settings, Building } from "lucide-react";
+import { LogOut, LayoutDashboard, Users, FileText, Sun, Moon, Settings, Building, BookOpen } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { useLanguage } from "@/lib/i18n";
 import { useTheme } from "next-themes";
@@ -45,6 +45,10 @@ export default function AppLayout({ children, role, email, name, department }: {
               <Link href="/admin/departments" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <Building className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 Kafedralar
+              </Link>
+              <Link href="/admin/resources" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <BookOpen className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                Resurslar
               </Link>
               <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <Settings className="w-5 h-5 text-gray-500 dark:text-gray-400" />
