@@ -107,11 +107,14 @@ export default function DashboardClient({
   });
 
   useEffect(() => {
-    if (driveFolderId && activeTab === "drive" && driveFiles.length === 0) {
+    if (driveFolderId && activeTab === "drive") {
       const loadDriveFiles = async () => {
+        setDriveFiles([]);
         setIsLoadingDrive(true);
+        setDriveError("");
         try {
-          const folderId = extractDriveId(driveFolderId) || driveFolderId;
+          const sanitizedFolderId = driveFolderId.trim().replace(/^.*\/folders\//, '').split('?')[0];
+          const folderId = extractDriveId(sanitizedFolderId) || sanitizedFolderId;
           const files = await fetchDriveFiles(folderId);
           setDriveFiles(files);
         } catch (error) {
