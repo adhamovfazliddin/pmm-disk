@@ -53,30 +53,30 @@ export default function LoginPage() {
     <div className="min-h-screen h-full w-full overflow-hidden grid grid-cols-1 lg:grid-cols-2 bg-slate-50 dark:bg-[#0B0F17] transition-colors duration-200">
       
       {/* Left Branding Hero - Hidden on Mobile */}
-      <div className="hidden lg:flex relative flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-800 via-indigo-900 to-slate-950 p-12 text-white border-r border-slate-200 dark:border-slate-800/80 shadow-2xl">
+      <div className="hidden lg:flex relative z-10 flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-800 via-indigo-900 to-slate-950 p-12 text-white rounded-r-[2.5rem] shadow-[15px_0_30px_-5px_rgba(0,0,0,0.15)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         {/* Ambient Glows */}
         <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-blue-500 rounded-full mix-blend-screen filter blur-[120px] opacity-50"></div>
         <div className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-500 rounded-full mix-blend-screen filter blur-[120px] opacity-50"></div>
         
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="bg-white p-2 rounded-2xl shadow-xl border border-white/20">
-            <Image src="/logo.png" alt="Logo" width={48} height={48} className="rounded-xl object-contain" />
+        <div className="relative z-10 flex items-center gap-5">
+          <div className="bg-white p-2.5 rounded-full shadow-xl border border-white/20 shrink-0 flex items-center justify-center w-20 h-20">
+            <Image src="/logo.png" alt="Logo" width={64} height={64} className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white drop-shadow-md">
+          <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-md leading-snug">
             {t('centerName')}
           </h1>
         </div>
 
         <div className="relative z-10 max-w-lg mt-auto mb-16">
-          <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-6 drop-shadow-md">
-            Raqamli ta'lim <br /> 
-            <span className="text-blue-400">kelajagi</span>
+          <h2 className="text-2xl sm:text-3xl font-bold leading-snug mb-6 drop-shadow-md">
+            Kelajak bunyodkorlari uchun zamonaviy o'qituvchi platformasi!
           </h2>
           <p className="text-lg text-blue-100/90 mb-10 leading-relaxed font-medium">
             Andijon viloyati pedagogik mahorat markazining yagona raqamli platformasi. Dars ishlanmalari, videodarslar va metodik tavsiyalarni o'z ichiga olgan ilg'or ta'lim tizimi.
           </p>
 
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl shadow-lg hover:bg-white/15 transition-all">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl p-6 rounded-2xl transition-all text-white">
             <div className="flex items-start gap-4">
               <div className="bg-blue-500/20 p-3 rounded-xl border border-blue-400/30 shadow-inner shrink-0">
                 <GraduationCap className="w-7 h-7 text-blue-300 drop-shadow-sm" />
@@ -151,7 +151,7 @@ export default function LoginPage() {
         </div>
 
         {/* Glassmorphism Auth Card */}
-        <div className="w-full max-w-[440px] backdrop-blur-xl bg-white/85 dark:bg-slate-900/85 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl rounded-3xl p-8 sm:p-10 relative z-10 overflow-hidden">
+        <div className="w-full max-w-[440px] backdrop-blur-xl bg-white/85 dark:bg-slate-900/85 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl shadow-gray-300/60 dark:shadow-black/50 rounded-3xl p-8 sm:p-10 relative z-10 overflow-hidden">
           {/* Subtle top gradient line */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
           
@@ -228,7 +228,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="group relative w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-200"
+                className="group relative w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98] transition-all duration-200"
               >
                 {isPending ? (
                   <>
@@ -243,29 +243,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Right Auth Container Footer (Social Links) */}
-        <div className="mt-8 text-center relative z-10">
-          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-3">
-            {language === 'UZ' ? 'Rasmiy sahifalarimiz' : 'Наши соцсети'}
-          </p>
-          <div className="flex items-center justify-center gap-1 sm:gap-2">
-            <a href="https://t.me/and_pm_metod_markaz" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-lg transition-colors" title="Telegram">
-              <TelegramIcon className="w-5 h-5" />
-            </a>
-            <a href="https://youtube.com/channel/UCZe9XNwqB58Xms1oBDMMNNA" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-red-600 dark:hover:text-red-400 p-2 rounded-lg transition-colors" title="YouTube">
-              <YoutubeIcon className="w-5 h-5" />
-            </a>
-            <a href="https://facebook.com/groups/957755739031872/?ref=share" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-blue-600 dark:hover:text-blue-500 p-2 rounded-lg transition-colors" title="Facebook">
-              <FacebookIcon className="w-5 h-5" />
-            </a>
-            <a href="https://instagram.com/andijonpmm.uz?igsh=MXVnYTUzdDM0Y3VwcA==" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-pink-600 dark:hover:text-pink-500 p-2 rounded-lg transition-colors" title="Instagram">
-              <InstagramIcon className="w-5 h-5" />
-            </a>
-            <a href="https://andijonpmm.uz/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-500 p-2 rounded-lg transition-colors" title="Website">
-              <Globe className="w-5 h-5" />
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );
