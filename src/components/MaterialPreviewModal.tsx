@@ -169,7 +169,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
       <div 
         ref={modalRef}
-        className={`bg-white dark:bg-[#111827] w-full sm:max-w-5xl h-[90vh] sm:h-[85vh] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 ${
+        className={`bg-white dark:bg-[#111827] w-[95vw] sm:w-[90vw] max-w-7xl h-[90vh] sm:h-[85vh] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 ${
           isFullScreen ? "fixed inset-0 !h-screen !w-screen !max-w-none !rounded-none z-[100] dark:bg-[#111827] bg-[#111827]" : ""
         }`}
       >
@@ -220,19 +220,21 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
         {/* Content Area */}
         <div className={`flex-1 relative overflow-hidden ${isFullScreen ? 'bg-[#111827] w-full h-full flex items-center justify-center' : 'bg-slate-100 dark:bg-[#0B0F17]'}`}>
           {canPreview ? (
-            <div className={isFullScreen ? "w-full h-full flex items-center justify-center overflow-hidden relative p-8" : "w-full h-full flex items-center justify-center overflow-hidden relative"}>
-              <iframe 
-                ref={iframeRef}
-                src={previewUrl}
-                className={`transition-transform duration-200 ease-out origin-center ${
-                  isFullScreen 
-                    ? "max-w-6xl w-full h-[85vh] rounded-xl shadow-2xl border border-gray-800 bg-white" 
-                    : "border-0 w-full h-full"
-                }`}
-                style={isFullScreen ? { transform: `scale(${zoom})` } : { transform: `scale(${zoom})` }}
-                allow="autoplay; fullscreen"
-                title={material.title}
-              />
+            <div className={isFullScreen ? "w-full h-full flex items-center justify-center p-4 sm:p-12 pb-28" : "w-full h-full p-2 sm:p-6 flex items-center justify-center"}>
+              <div className={`relative flex items-center justify-center w-full h-full max-h-full ${isFullScreen ? 'max-w-7xl aspect-video' : 'aspect-video max-w-5xl'}`}>
+                <iframe 
+                  ref={iframeRef}
+                  src={previewUrl}
+                  className={`w-full h-full transition-transform duration-200 ease-out origin-center ${
+                    isFullScreen 
+                      ? "rounded-xl shadow-2xl border border-gray-800 bg-white" 
+                      : "rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 bg-white"
+                  }`}
+                  style={isFullScreen ? { transform: `scale(${zoom})` } : { transform: `scale(${zoom})` }}
+                  allow="autoplay; fullscreen"
+                  title={material.title}
+                />
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -259,7 +261,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
           {/* Floating Control Bar (HUD) in Fullscreen */}
           {isFullScreen && (
             <div 
-              className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 backdrop-blur-md border border-white/10 px-4 py-3 rounded-2xl shadow-2xl z-50 text-white transition-opacity duration-500 ease-in-out ${
+              className={`absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/85 backdrop-blur-md border border-white/10 px-4 py-3 rounded-2xl shadow-2xl z-[150] text-white transition-opacity duration-500 ease-in-out ${
                 isIdle ? 'opacity-0 pointer-events-none' : 'opacity-100'
               }`}
               onMouseEnter={() => setIsIdle(false)}
