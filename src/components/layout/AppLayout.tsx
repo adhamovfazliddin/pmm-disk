@@ -44,11 +44,11 @@ export default function AppLayout({ children, role, email, name, department }: {
               </Link>
               <Link href="/admin/departments" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <Building className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                Kafedralar
+                {t('departments')}
               </Link>
               <Link href="/admin/resources" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <BookOpen className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                Resurslar
+                {t('resources')}
               </Link>
               <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <Settings className="w-5 h-5 text-gray-500 dark:text-gray-400" />

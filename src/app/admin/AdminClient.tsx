@@ -114,13 +114,13 @@ export default function AdminClient({
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">{t('adminDashboard')}</h1>
         <div className="flex items-center gap-3">
           <Link href="/admin/resources" className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-all shadow-sm shadow-emerald-500/20">
-            <BookOpen className="w-4 h-4" /> Resurslar
+            <BookOpen className="w-4 h-4" /> {t('resources')}
           </Link>
           <Link href="/admin/materials" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-all shadow-sm shadow-blue-500/20">
-            <span className="text-lg leading-none">+</span> Material qo'shish
+            {t('addMaterial')}
           </Link>
           <Link href="/admin/teachers" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1E293B]/60 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium rounded-xl transition-all shadow-sm">
-            <span className="text-lg leading-none">+</span> Yangi kafedra
+            {t('addDepartment')}
           </Link>
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function AdminClient({
                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('formatField')}</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('subjectField')}</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('authorDate')}</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Amallar</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">

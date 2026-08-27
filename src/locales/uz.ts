@@ -15,6 +15,10 @@ export const uz = {
   teachers: "O'qituvchilar",
   materials: "Materiallar",
   catalog: "Katalog",
+  resources: "Resurslar",
+  departments: "Kafedralar",
+  addDepartment: "+ Yangi kafedra",
+  actions: "AMALLAR",
   logout: "Chiqish",
 
   // Login & Settings
@@ -36,7 +40,7 @@ export const uz = {
 
   // Admin Materials
   materialsManagement: "Materiallarni boshqarish",
-  addMaterial: "Material qo'shish",
+  addMaterial: "+ Material qo'shish",
   titleField: "Sarlavha",
   subjectField: "Fan",
   formatField: "Format",

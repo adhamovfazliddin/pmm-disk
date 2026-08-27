@@ -15,6 +15,10 @@ export const ru = {
   teachers: "Учителя",
   materials: "Материалы",
   catalog: "Каталог",
+  resources: "Ресурсы",
+  departments: "Кафедры",
+  addDepartment: "+ Новая кафедра",
+  actions: "ДЕЙСТВИЯ",
   logout: "Выйти",
 
   // Login & Settings
@@ -36,7 +40,7 @@ export const ru = {
 
   // Admin Materials
   materialsManagement: "Управление материалами",
-  addMaterial: "Добавить материал",
+  addMaterial: "+ Добавить материал",
   titleField: "Заголовок",
   subjectField: "Предмет",
   formatField: "Формат",
