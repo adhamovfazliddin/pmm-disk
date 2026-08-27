@@ -55,8 +55,13 @@ function initStore() {
 
 export function getResources(): GlobalResource[] {
   initStore();
-  const data = fs.readFileSync(dataFilePath, 'utf-8');
-  return JSON.parse(data) as GlobalResource[];
+  try {
+    const data = fs.readFileSync(dataFilePath, 'utf-8');
+    return JSON.parse(data) as GlobalResource[];
+  } catch (error) {
+    console.error("Failed to read or parse resources.json:", error);
+    return [];
+  }
 }
 
 export function addResource(resource: Omit<GlobalResource, 'id'>): GlobalResource {

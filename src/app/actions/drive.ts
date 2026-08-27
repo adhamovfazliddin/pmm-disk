@@ -1,7 +1,5 @@
 "use server";
 
-import { extractDriveFolderId } from "@/lib/drive";
-
 export interface DriveFile {
   id: string;
   name: string;
@@ -13,18 +11,22 @@ export interface DriveFile {
 }
 
 export async function fetchDriveFiles(folderId: string): Promise<DriveFile[]> {
+  const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
+  
+  if (!apiKey) {
+    console.warn("GOOGLE_DRIVE_API_KEY is not set. Cannot fetch folder contents from Google Drive API.");
+    return [];
+  }
+
+  if (!folderId || folderId.trim().length < 10) {
+    console.warn("Invalid or missing folder ID:", folderId);
+    return [];
+  }
+  
   try {
-    const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
-    
-    if (!apiKey) {
-      console.warn("GOOGLE_DRIVE_API_KEY is not set. Cannot fetch folder contents from Google Drive API.");
-      return [];
-    }
-    
     // We only select the fields we need to keep the payload small
     const fields = "files(id, name, mimeType, modifiedTime, webViewLink, webContentLink, iconLink)";
-    const sanitizedId = extractDriveFolderId(folderId);
-    const query = `'${sanitizedId}' in parents and trashed = false`;
+    const query = `'${folderId}' in parents and trashed = false`;
     
     if (process.env.NODE_ENV === "development") {
       console.log(`[Drive API] Query: ${query}`);
@@ -41,13 +43,24 @@ export async function fetchDriveFiles(folderId: string): Promise<DriveFile[]> {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Google Drive API Error (${response.status}):`, errorText);
-      return [];
+      
+      if (response.status === 403) {
+        throw new Error("Google Drive jildiga kirish taqiqlangan. Jild «Barcha uchun ochiq» holatda ekanligini tekshiring.");
+      }
+      if (response.status === 404) {
+        throw new Error("Google Drive jildi topilmadi. Jild havolasi to'g'ri ekanligini tekshiring.");
+      }
+      throw new Error(`Google Drive API xatoligi (${response.status})`);
     }
     
     const data = await response.json();
     return data.files || [];
   } catch (error) {
+    // Re-throw known user-facing errors
+    if (error instanceof Error && !error.message.startsWith("Error fetching")) {
+      throw error;
+    }
     console.error("Error fetching drive files:", error);
-    return [];
+    throw new Error("Google Drive bilan bog'lanishda xatolik yuz berdi.");
   }
 }

@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Link as LinkIcon, Plus, X, Globe } from "lucide-react";
-import { getDrivePreviewUrl, extractDriveId, extractDriveFolderId } from "@/lib/drive";
-
-import { addGlobalResourceAction } from "@/app/actions/resource";
+import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe } from "lucide-react";
+import { extractDriveFolderId } from "@/lib/drive";
 
 import { useLanguage } from "@/lib/i18n";
 import { recordMaterialActivity } from "@/app/actions/analytics";
@@ -108,35 +106,54 @@ export default function DashboardClient({
 
   useEffect(() => {
     if (driveFolderId && activeTab === "drive") {
+      let cancelled = false;
       const loadDriveFiles = async () => {
         setDriveFiles([]);
         setIsLoadingDrive(true);
         setDriveError("");
         try {
           const folderId = extractDriveFolderId(driveFolderId);
+          if (!folderId) {
+            setDriveError("Noto'g'ri Google Drive jild havolasi");
+            return;
+          }
           const files = await fetchDriveFiles(folderId);
-          setDriveFiles(files);
+          if (!cancelled) {
+            setDriveFiles(files);
+            if (files.length === 0) {
+              setDriveError("Bu jildda hech qanday fayl topilmadi yoki jild ochiq emas.");
+            }
+          }
         } catch (error) {
           console.error(error);
-          setDriveError("Fayllarni yuklashda xatolik yuz berdi");
+          if (!cancelled) {
+            const message = error instanceof Error ? error.message : "Fayllarni yuklashda xatolik yuz berdi.";
+            setDriveError(message);
+          }
         } finally {
-          setIsLoadingDrive(false);
+          if (!cancelled) {
+            setIsLoadingDrive(false);
+          }
         }
       };
       loadDriveFiles();
+      return () => { cancelled = true; };
     }
   }, [driveFolderId, activeTab]);
 
   useEffect(() => {
-    const savedMode = localStorage.getItem('materials_view_mode');
-    if (savedMode === 'grid' || savedMode === 'table') {
-      setViewMode(savedMode);
-    }
-    const savedBookmarks = localStorage.getItem('teacher_bookmarked_ids');
-    if (savedBookmarks) {
-      try {
+    try {
+      const savedMode = localStorage.getItem('materials_view_mode');
+      if (savedMode === 'grid' || savedMode === 'table') {
+        setViewMode(savedMode);
+      }
+      const savedBookmarks = localStorage.getItem('teacher_bookmarked_ids');
+      if (savedBookmarks) {
         setBookmarkedIds(JSON.parse(savedBookmarks));
-      } catch (e) {}
+      }
+    } catch (e) {
+      // localStorage may be unavailable (SSR, private browsing)
+      console.warn('Failed to read from localStorage:', e);
     }
   }, []);
 
@@ -586,7 +603,7 @@ export default function DashboardClient({
                     href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
                     target="_blank"
                     rel="noreferrer"
-                    onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD')}
+                    onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD').catch(console.error)}
                     className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 px-3 py-2 rounded-md transition-colors"
                   >
                     <Download className="w-4 h-4" /> {t('download')}
@@ -660,7 +677,7 @@ export default function DashboardClient({
                           href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
                           target="_blank"
                           rel="noreferrer"
-                          onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD')}
+                          onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD').catch(console.error)}
                           className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
                           title={t('download')}
                         >

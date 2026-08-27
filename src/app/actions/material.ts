@@ -62,12 +62,19 @@ export async function deleteMaterial(id: string) {
   const session = await getSession();
   if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
 
-  await prisma.material.delete({
-    where: { id }
-  });
-  revalidatePath("/admin/materials");
-  revalidatePath("/dashboard");
-  return { success: true };
+  try {
+    // Delete dependent records first to avoid foreign key constraint errors
+    await prisma.materialActivity.deleteMany({ where: { materialId: id } });
+    await prisma.materialAssignment.deleteMany({ where: { materialId: id } });
+    await prisma.material.delete({ where: { id } });
+    
+    revalidatePath("/admin/materials");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete material:", error);
+    return { error: "Materialni o'chirishda xatolik yuz berdi." };
+  }
 }
 
 const materialUpdateSchema = materialSchema.extend({

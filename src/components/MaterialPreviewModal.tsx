@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { 
-  X, Maximize2, Minimize2, Download, FileText, Video, Presentation, 
-  FileArchive, File, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw 
+  X, Minimize2, Download, FileText, Video, Presentation, 
+  FileArchive, File, ZoomIn, ZoomOut, RotateCcw 
 } from "lucide-react";
 import { getDriveDownloadUrl } from "@/lib/drive";
 import { recordMaterialActivity } from "@/app/actions/analytics";
@@ -35,24 +35,41 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
   const { t } = useLanguage();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [currentSlide, setCurrentSlide] = useState(1);
   const [isIdle, setIsIdle] = useState(false);
-  const totalSlides = 100; // Large mock limit
   
   const modalRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Track activity recording to avoid duplicate calls for the same material
+  const lastRecordedId = useRef<string | null>(null);
+
   useEffect(() => {
-    if (isOpen && material) {
+    if (isOpen && material && material.id !== lastRecordedId.current) {
+      lastRecordedId.current = material.id;
       recordMaterialActivity(material.id, 'VIEW').catch(console.error);
       setZoom(1);
-      setCurrentSlide(1);
+    }
+    if (!isOpen) {
+      lastRecordedId.current = null;
     }
   }, [isOpen, material]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   // Idle timer for HUD
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleActivity = () => {
       setIsIdle(false);
       if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -74,7 +91,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
       window.removeEventListener("keydown", handleActivity);
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
-  }, [isFullScreen]);
+  }, [isFullScreen, isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -89,14 +106,6 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
       }
       
       if (isFullScreen) {
-        if (["ArrowRight", "ArrowLeft", "Space"].includes(e.key)) {
-           if (e.key === "ArrowRight" || e.key === "Space") {
-             setCurrentSlide(prev => Math.min(prev + 1, totalSlides));
-           } else if (e.key === "ArrowLeft") {
-             setCurrentSlide(prev => Math.max(prev - 1, 1));
-           }
-        }
-        
         if (e.key === "=" || e.key === "+") {
           setZoom(prev => Math.min(prev + 0.1, 3));
         }
@@ -108,6 +117,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isFullScreen, onClose]);
 
   const toggleFullScreen = async () => {
@@ -252,29 +262,9 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
               className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 backdrop-blur-md border border-white/10 px-4 py-3 rounded-2xl shadow-2xl z-50 text-white transition-opacity duration-500 ease-in-out ${
                 isIdle ? 'opacity-0 pointer-events-none' : 'opacity-100'
               }`}
-              onMouseEnter={() => setIsIdle(false)} // Prevent fade when hovering HUD
+              onMouseEnter={() => setIsIdle(false)}
             >
               <div className="flex items-center gap-1 pr-3 border-r border-white/20">
-                <button 
-                  className="p-2 rounded-lg hover:bg-white/20 transition-colors active:bg-white/30"
-                  onClick={() => setCurrentSlide(prev => Math.max(prev - 1, 1))}
-                  title="Oldingi (Left Arrow)"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-sm font-semibold px-2 tracking-widest text-white/90 min-w-[3rem] text-center">
-                  {currentSlide}
-                </span>
-                <button 
-                  className="p-2 rounded-lg hover:bg-white/20 transition-colors active:bg-white/30"
-                  onClick={() => setCurrentSlide(prev => Math.min(prev + 1, totalSlides))}
-                  title="Keyingi (Right Arrow / Space)"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-1 px-3 border-r border-white/20">
                 <button 
                   className="p-2 rounded-lg hover:bg-white/20 transition-colors active:bg-white/30"
                   onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
@@ -304,6 +294,7 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
                   href={downloadUrl}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD')}
                   className="p-2 rounded-lg hover:bg-white/20 transition-colors active:bg-white/30 text-white"
                   title="Yuklab olish"
                 >
