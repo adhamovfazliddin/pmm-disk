@@ -41,6 +41,25 @@ model User {
   materialsCreated Material[]
   assignedMaterials MaterialAssignment[]
   activities       MaterialActivity[]
+
+  departmentResources Resource[] @relation("ResourceDepartments")
+  teacherResources    Resource[] @relation("ResourceTeachers")
+}
+
+model Resource {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  type        String
+  url         String
+  category    String
+  visibility  Visibility @default(GLOBAL)
+
+  departments User[]     @relation("ResourceDepartments")
+  teachers    User[]     @relation("ResourceTeachers")
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Material {

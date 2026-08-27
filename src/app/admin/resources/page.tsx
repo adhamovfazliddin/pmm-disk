@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { getResources } from "@/lib/resourceStore";
 import ResourcesClient from "./ResourcesClient";
 
 export default async function AdminResourcesPage() {
@@ -16,9 +15,21 @@ export default async function AdminResourcesPage() {
   let globalResources: any[] = [];
 
   try {
-    globalResources = getResources() || [];
+    const dbResources = await prisma.resource.findMany({
+      include: {
+        departments: { select: { id: true } },
+        teachers: { select: { id: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    globalResources = dbResources.map(res => ({
+      ...res,
+      departmentIds: res.departments.map(d => d.id),
+      teacherIds: res.teachers.map(t => t.id)
+    }));
   } catch (error) {
-    console.error("Failed to load resources.json", error);
+    console.error("Failed to load resources from DB", error);
   }
 
   try {

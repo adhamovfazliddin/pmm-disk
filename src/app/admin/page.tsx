@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/db";
 import AdminClient from "./AdminClient";
 import { getAdminAnalytics } from "@/app/actions/analytics";
-import { getResources } from "@/lib/resourceStore";
 
 export default async function AdminDashboard() {
   const totalTeachers = await prisma.user.count({ where: { role: "TEACHER" } });
