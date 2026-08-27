@@ -8,6 +8,7 @@ export interface DriveFile {
   webViewLink: string;
   webContentLink?: string;
   iconLink?: string;
+  thumbnailLink?: string;
 }
 
 export async function fetchDriveFiles(folderId: string): Promise<DriveFile[]> {
@@ -25,7 +26,7 @@ export async function fetchDriveFiles(folderId: string): Promise<DriveFile[]> {
   
   try {
     // We only select the fields we need to keep the payload small
-    const fields = "files(id, name, mimeType, modifiedTime, webViewLink, webContentLink, iconLink)";
+    const fields = "files(id, name, mimeType, modifiedTime, webViewLink, webContentLink, iconLink, thumbnailLink)";
     const query = `'${folderId}' in parents and trashed = false`;
     
     if (process.env.NODE_ENV === "development") {

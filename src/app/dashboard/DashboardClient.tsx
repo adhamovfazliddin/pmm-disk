@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe } from "lucide-react";
+import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2 } from "lucide-react";
 import { extractDriveFolderId } from "@/lib/drive";
 
 import { useLanguage } from "@/lib/i18n";
@@ -40,6 +40,8 @@ interface Material {
   format: string;
   driveFileId: string;
   createdAt: Date;
+  thumbnailLink?: string;
+  webViewLink?: string;
 }
 
 export function getDriveFolderEmbedUrl(urlOrId: string | null | undefined): string | null {
@@ -203,7 +205,8 @@ export default function DashboardClient({
       createdAt: file.modifiedTime ? new Date(file.modifiedTime) : new Date(),
       isDriveFile: true,
       webViewLink: file.webViewLink,
-      webContentLink: file.webContentLink
+      webContentLink: file.webContentLink,
+      thumbnailLink: file.thumbnailLink
     };
   });
 
@@ -555,24 +558,33 @@ export default function DashboardClient({
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayMaterials.map((material) => (
-            <div key={material.id} className="backdrop-blur-md bg-white/90 dark:bg-[#111827]/90 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col h-full">
-              <div className="p-5 flex-1">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-2">
-                    {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <div className="p-2 bg-slate-100 dark:bg-[#1E293B]/60 rounded-lg shrink-0"><File className="w-5 h-5 text-gray-500" /></div>}
-                    <button 
-                      onClick={() => toggleBookmark(material.id)}
-                      className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-all ml-auto"
-                      title="Saqlash / Olib tashlash"
-                    >
-                      <Star className={`w-5 h-5 transition-transform ${bookmarkedIds.includes(material.id) ? 'fill-amber-400 text-amber-500 scale-110' : ''}`} />
-                    </button>
+            <div key={material.id} className="backdrop-blur-md bg-white/90 dark:bg-[#111827]/90 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col h-full group">
+              {/* Thumbnail / Header Section edge-to-edge */}
+              <div className="w-full h-40 bg-slate-100 dark:bg-[#1E293B]/60 relative border-b border-slate-200/80 dark:border-slate-800/80 overflow-hidden">
+                {material.thumbnailLink ? (
+                  <img src={material.thumbnailLink} alt={material.title} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
+                    {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <File className="w-12 h-12" />}
                   </div>
-                  <span className="flex w-max items-center gap-1.5 px-2.5 py-1 mt-1.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 dark:bg-[#1E293B]/60 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 transition-colors">
+                )}
+                
+                {/* Absolute positioned elements over the thumbnail */}
+                <div className="absolute top-3 right-3 flex items-center gap-2">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white/90 text-slate-800 dark:bg-black/60 dark:text-slate-200 backdrop-blur-md shadow-sm border border-black/5 dark:border-white/10 transition-colors">
                     <BookOpen className="w-3.5 h-3.5" /> {material.subject}
                   </span>
+                  <button 
+                    onClick={() => toggleBookmark(material.id)}
+                    className="p-1.5 bg-white/90 dark:bg-black/60 backdrop-blur-md shadow-sm border border-black/5 dark:border-white/10 text-slate-500 hover:text-amber-500 rounded-lg transition-all"
+                    title="Saqlash / Olib tashlash"
+                  >
+                    <Star className={`w-4 h-4 transition-transform ${bookmarkedIds.includes(material.id) ? 'fill-amber-400 text-amber-500 scale-110' : ''}`} />
+                  </button>
                 </div>
+              </div>
 
+              <div className="p-5 flex-1">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2" title={material.title}>
                   {material.title}
                 </h3>
@@ -590,6 +602,17 @@ export default function DashboardClient({
                 </div>
 
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      const url = material.webViewLink || `https://drive.google.com/file/d/${material.driveFileId}/view`;
+                      navigator.clipboard.writeText(url);
+                      toast.success("Nusxa olindi");
+                    }}
+                    className="flex-none flex items-center justify-center p-2 text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 dark:bg-slate-700/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 rounded-md transition-colors"
+                    title="Ulashish (Nusxa olish)"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => {
                       setSelectedMaterial(material);
@@ -633,7 +656,13 @@ export default function DashboardClient({
                     <td className="p-4 text-center font-medium text-slate-500">{index + 1}</td>
                     <td className="p-4 align-middle font-medium text-slate-900 dark:text-slate-100 max-w-xs">
                       <div className="flex items-center gap-3">
-                        {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <div className="p-2 bg-slate-100 dark:bg-[#1E293B]/60 rounded-lg shrink-0"><File className="w-5 h-5 text-gray-500" /></div>}
+                        {material.thumbnailLink ? (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
+                            <img src={material.thumbnailLink} alt={material.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          </div>
+                        ) : (
+                          FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <div className="p-2 bg-slate-100 dark:bg-[#1E293B]/60 rounded-lg shrink-0"><File className="w-5 h-5 text-gray-500" /></div>
+                        )}
                         <div className="flex flex-col min-w-0 gap-0.5">
                           <span className="truncate font-semibold text-gray-900 dark:text-white">{material.title}</span>
                           <span className="text-xs text-slate-500 dark:text-slate-400 truncate">{material.description || ""}</span>
@@ -662,6 +691,17 @@ export default function DashboardClient({
                           title="Saqlash / Olib tashlash"
                         >
                           <Star className={`w-4 h-4 transition-transform ${bookmarkedIds.includes(material.id) ? 'fill-amber-400 text-amber-500 scale-110' : ''}`} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const url = material.webViewLink || `https://drive.google.com/file/d/${material.driveFileId}/view`;
+                            navigator.clipboard.writeText(url);
+                            toast.success("Nusxa olindi");
+                          }}
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-500/10 rounded-xl transition-all"
+                          title="Ulashish (Nusxa olish)"
+                        >
+                          <Share2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => {
