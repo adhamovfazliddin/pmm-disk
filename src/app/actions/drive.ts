@@ -34,14 +34,15 @@ export async function fetchDriveFiles(folderId: string): Promise<DriveFile[]> {
     
     const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=${encodeURIComponent(fields)}&key=${apiKey}`;
     
-    const response = await fetch(url, { next: { revalidate: 60 } }); // Cache for 60 seconds
+    console.log(`[Drive API] Endpoint URL being called: ${url.replace(apiKey, "HIDDEN_API_KEY")}`);
     
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[Drive API] Status: ${response.status} ${response.statusText}`);
-    }
+    const response = await fetch(url, { cache: 'no-store' }); // Disable cache to prevent stale empty responses
+    
+    console.log(`[Drive API] Response Status: ${response.status} ${response.statusText}`);
     
     if (!response.ok) {
       const errorText = await response.text();
+      console.log(`[Drive API] Raw error body:`, errorText);
       console.error(`Google Drive API Error (${response.status}):`, errorText);
       
       if (response.status === 403) {
@@ -54,6 +55,7 @@ export async function fetchDriveFiles(folderId: string): Promise<DriveFile[]> {
     }
     
     const data = await response.json();
+    console.log(`[Drive API] Parsed ${data.files?.length || 0} files from response`);
     return data.files || [];
   } catch (error) {
     // Re-throw known user-facing errors
