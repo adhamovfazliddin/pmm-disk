@@ -122,6 +122,10 @@ export const ru = {
   driveFolderLink: "Ссылка на папку Google Drive",
   openInDrive: "Открыть в Google Drive",
   departmentDashboardTitle: "Панель Управления Кафедры",
+  tabDriveFolder: "Папка кафедры в Drive",
+  tabPlatformMaterials: "Материалы платформы",
+  tabUsefulResources: "Полезные ресурсы",
+  filterFavorites: "Избранное",
 
   // Modal
   fullScreen: "Полный экран",

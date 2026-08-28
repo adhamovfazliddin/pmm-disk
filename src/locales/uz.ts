@@ -120,6 +120,10 @@ export const uz = {
   driveFolderLink: "Google Drive Jild URL",
   openInDrive: "Google Drive-da ochish",
   departmentDashboardTitle: "Kafedra Boshqaruv Paneli",
+  tabDriveFolder: "Kafedra Drive Jildi",
+  tabPlatformMaterials: "Platforma Materiallari",
+  tabUsefulResources: "Foydali Resurslar",
+  filterFavorites: "Tanlanganlar",
 
   // Modal
   fullScreen: "To'liq ekran",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2 } from "lucide-react";
+import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2, Building } from "lucide-react";
 import { extractDriveFolderId } from "@/lib/drive";
 
 import { useLanguage } from "@/lib/i18n";
@@ -220,19 +220,28 @@ export default function DashboardClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 bg-white/90 dark:bg-[#111827]/90 p-6 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 bg-slate-50 dark:bg-slate-900/50 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">{t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli"}</h1>
-          <p className="text-blue-600 dark:text-blue-400 mt-1 text-xl font-medium">{sessionName}</p>
-          {description && <p className="text-gray-600 dark:text-gray-400 mt-3 max-w-3xl leading-relaxed">{description}</p>}
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-100/50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl">
+              <Building className="w-6 h-6" />
+            </div>
+            <h1 className="text-2xl font-bold text-blue-950 dark:text-white transition-colors">{t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli"}</h1>
+          </div>
+          <div className="mt-4 flex items-center">
+             <span className="bg-blue-100/60 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200/50 dark:border-blue-800/50">
+               {sessionName}
+             </span>
+          </div>
+          {description && <p className="text-gray-600 dark:text-gray-400 mt-4 max-w-3xl leading-relaxed text-sm md:text-base">{description}</p>}
         </div>
         {driveFolderId && (
-          <div className="shrink-0 pt-2">
+          <div className="shrink-0 pt-2 md:pt-0">
             <a 
               href={getFullDriveUrl(driveFolderId)}
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 font-medium cursor-pointer"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 font-bold cursor-pointer"
             >
               <ExternalLink className="w-5 h-5" /> {t('openInDrive') || "Google Drive orqali ochish"}
             </a>
@@ -251,7 +260,7 @@ export default function DashboardClient({
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
             }`}
           >
-            📁 Kafedra Drive Jildi
+            📁 {t('tabDriveFolder') || "Kafedra Drive Jildi"}
           </button>
         )}
         <button
@@ -262,7 +271,7 @@ export default function DashboardClient({
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
           }`}
         >
-          📚 Platforma Materiallari
+          📚 {t('tabPlatformMaterials') || "Platforma Materiallari"}
         </button>
         <button
           onClick={() => setActiveTab("resources")}
@@ -272,7 +281,7 @@ export default function DashboardClient({
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
           }`}
         >
-          🎓 Foydali Resurslar / Video Darslar
+          🎓 {t('tabUsefulResources') || "Foydali Resurslar"}
         </button>
       </div>
 
@@ -282,7 +291,7 @@ export default function DashboardClient({
           <div className="flex flex-col md:flex-row gap-4 bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 transition-colors">
             <div className="flex items-center justify-between md:w-auto md:pr-4 md:border-r border-slate-200 dark:border-slate-800">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-blue-500" /> Foydali Resurslar
+                <BookOpen className="w-5 h-5 text-blue-500" /> {t('tabUsefulResources') || "Foydali Resurslar"}
               </h2>
               <span className="ml-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 py-0.5 px-2.5 rounded-full text-xs font-semibold">
                 {filteredLocalResources.length}
@@ -294,7 +303,7 @@ export default function DashboardClient({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Resurslarni qidirish..."
+                  placeholder={t('search')}
                   value={resourceSearch}
                   onChange={(e) => setResourceSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-700/60 bg-slate-50/50 dark:bg-[#1E293B]/60 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
@@ -492,7 +501,7 @@ export default function DashboardClient({
                   : 'bg-slate-50 dark:bg-[#1E293B]/60 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
-              <Star className={`w-4 h-4 transition-transform ${showBookmarksOnly ? 'fill-current scale-110 text-amber-500' : ''}`} /> Tanlanganlar
+              <Star className={`w-4 h-4 transition-transform ${showBookmarksOnly ? 'fill-current scale-110 text-amber-500' : ''}`} /> {t('filterFavorites') || "Tanlanganlar"}
             </button>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
             {[

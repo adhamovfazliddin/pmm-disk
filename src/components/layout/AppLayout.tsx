@@ -22,8 +22,8 @@ export default function AppLayout({ children, role, email, name, department }: {
   return (
     <div className="flex h-screen bg-transparent transition-colors">
       {/* Sidebar (Desktop) */}
-      <aside className="w-64 bg-white dark:bg-[#0D131F] border-r border-slate-200/80 shadow-sm dark:border-slate-800/80 flex-col hidden md:flex transition-colors">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
+      <aside className="w-64 bg-gray-100 dark:bg-[#0D131F] border-r border-gray-200 shadow-sm dark:border-slate-800/80 flex-col hidden md:flex transition-colors">
+        <div className="p-4 border-b border-dashed border-gray-300 dark:border-gray-700 flex items-center gap-3">
           <Image src="/logo.png" alt="ARCPE Logo" width={40} height={40} className="rounded-md object-contain" />
           <span className="font-bold text-gray-800 dark:text-gray-100 text-sm leading-tight">{t('title')}</span>
         </div>
@@ -69,8 +69,8 @@ export default function AppLayout({ children, role, email, name, department }: {
         </nav>
         
         {/* Toggles & Logout */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
-          <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800/80 p-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+        <div className="p-4 border-t border-dashed border-gray-300 dark:border-gray-700 space-y-4">
+          <div className="flex items-center justify-between bg-white dark:bg-gray-800/80 p-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
             <div className="flex items-center gap-1">
               <button 
                 onClick={() => setLanguage("UZ")} 
