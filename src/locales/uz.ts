@@ -18,6 +18,7 @@ export const uz = {
   resources: "Resurslar",
   departments: "Kafedralar",
   addDepartment: "+ Yangi kafedra",
+  library: "Kutubxona",
   actions: "AMALLAR",
   logout: "Chiqish",
 

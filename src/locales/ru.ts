@@ -18,6 +18,7 @@ export const ru = {
   resources: "Ресурсы",
   departments: "Кафедры",
   addDepartment: "+ Новая кафедра",
+  library: "Библиотека",
   actions: "ДЕЙСТВИЯ",
   logout: "Выйти",
 

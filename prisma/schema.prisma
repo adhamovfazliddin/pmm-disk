@@ -102,3 +102,14 @@ model MaterialActivity {
   material   Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
   teacher    User?      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 }
+
+model LibraryBook {
+  id         String   @id @default(cuid())
+  title      String
+  author     String?
+  coverImage String?
+  driveUrl   String
+  category   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

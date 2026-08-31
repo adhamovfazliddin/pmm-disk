@@ -3,16 +3,28 @@
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LogOut, LayoutDashboard, Users, FileText, Sun, Moon, Settings, Building, BookOpen } from "lucide-react";
+import { LogOut, LayoutDashboard, Users, FileText, Sun, Moon, Settings, Building, BookOpen, Library } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { useLanguage } from "@/lib/i18n";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import MobileBottomNav from "./MobileBottomNav";
 
 export default function AppLayout({ children, role, email, name, department }: { children: ReactNode, role: string, email?: string, name?: string, department?: string }) {
   const { t, language, setLanguage } = useLanguage();
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
+  const adminLinks = [
+    { href: "/admin", icon: LayoutDashboard, label: t('dashboard') },
+    { href: "/admin/teachers", icon: Users, label: t('teachers') },
+    { href: "/admin/materials", icon: FileText, label: t('materials') },
+    { href: "/admin/departments", icon: Building, label: t('departments') },
+    { href: "/admin/resources", icon: BookOpen, label: t('resources') },
+    { href: "/admin/library", icon: Library, label: t('library') },
+    { href: "/admin/settings", icon: Settings, label: t('settings') },
+  ];
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -28,43 +40,35 @@ export default function AppLayout({ children, role, email, name, department }: {
           <span className="font-bold text-gray-800 dark:text-gray-100 text-sm leading-tight">{t('title')}</span>
         </div>
         <nav className="flex-1 p-4 space-y-1">
-          {role === "SUPERADMIN" && (
-            <>
-              <Link href="/admin" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <LayoutDashboard className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                {t('dashboard')}
+          {role === "SUPERADMIN" && adminLinks.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link 
+                key={item.href}
+                href={item.href} 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive 
+                    ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                {item.label}
               </Link>
-              <Link href="/admin/teachers" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <Users className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                {t('teachers')}
-              </Link>
-              <Link href="/admin/materials" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <FileText className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                {t('materials')}
-              </Link>
-              <Link href="/admin/departments" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <Building className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                {t('departments')}
-              </Link>
-              <Link href="/admin/resources" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <BookOpen className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                {t('resources')}
-              </Link>
-              <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <Settings className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                {t('settings')}
-              </Link>
-
-            </>
-          )}
+            )
+          })}
           {role === "TEACHER" && (
-            <>
-              <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <LayoutDashboard className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                {t('catalog')}
-              </Link>
-
-            </>
+            <Link 
+              href="/dashboard" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                pathname === '/dashboard'
+                  ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <LayoutDashboard className={`w-5 h-5 ${pathname === '/dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+              {t('catalog')}
+            </Link>
           )}
         </nav>
         
