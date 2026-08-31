@@ -22,6 +22,7 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
@@ -69,7 +70,7 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
         const res = await updateLibraryBook(editingId, formData);
         if (res.success) {
           setBooks(books.map(b => b.id === editingId ? res.book : b));
-          toast.success("Kitob muvaffaqiyatli tahrirlandi!");
+          toast.success("Kitob muvaffaqiyatli saqlandi");
           handleCloseModal();
         } else {
           toast.error("Kitobni tahrirlashda xatolik yuz berdi");
@@ -78,7 +79,7 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
         const res = await addLibraryBook(formData);
         if (res.success) {
           setBooks([res.book, ...books]);
-          toast.success("Kitob muvaffaqiyatli qo'shildi!");
+          toast.success("Kitob muvaffaqiyatli saqlandi");
           handleCloseModal();
         } else {
           toast.error("Kitob qo'shishda xatolik yuz berdi");
@@ -91,19 +92,27 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Rostdan ham ushbu kitobni o'chirmoqchimisiz?")) return;
+  const confirmDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirmId) return;
     
+    setIsSubmitting(true);
     try {
-      const res = await deleteLibraryBook(id);
+      const res = await deleteLibraryBook(deleteConfirmId);
       if (res.success) {
-        setBooks(books.filter(b => b.id !== id));
-        toast.success("Kitob o'chirildi!");
+        setBooks(books.filter(b => b.id !== deleteConfirmId));
+        toast.success("Muvaffaqiyatli o'chirildi");
+        setDeleteConfirmId(null);
       } else {
         toast.error("Xatolik yuz berdi");
       }
     } catch (error) {
       toast.error("Tizim xatosi");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -146,7 +155,7 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
                   <button onClick={() => handleEditClick(book)} className="p-2 bg-white/90 dark:bg-slate-800/90 hover:text-blue-600 rounded-lg shadow-sm backdrop-blur-sm transition-colors text-slate-700 dark:text-slate-300">
                     <Edit3 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => handleDelete(book.id)} className="p-2 bg-white/90 dark:bg-slate-800/90 hover:text-red-600 rounded-lg shadow-sm backdrop-blur-sm transition-colors text-slate-700 dark:text-slate-300">
+                  <button onClick={() => confirmDelete(book.id)} className="p-2 bg-white/90 dark:bg-slate-800/90 hover:text-red-600 rounded-lg shadow-sm backdrop-blur-sm transition-colors text-slate-700 dark:text-slate-300">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -268,6 +277,37 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200 p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-8 h-8 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">O'chirishni tasdiqlaysizmi?</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              Rostdan ham ushbu kitobni o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                disabled={isSubmitting}
+                className="px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all disabled:opacity-70 flex-1"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl transition-all disabled:opacity-70 flex items-center justify-center gap-2 flex-1 shadow-sm shadow-red-500/20"
+              >
+                {isSubmitting ? "O'chirilmoqda..." : "O'chirish"}
+              </button>
+            </div>
           </div>
         </div>
       )}
