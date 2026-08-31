@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Trash2, ExternalLink, Image as ImageIcon, Book, User, Tag, Link as LinkIcon, Save, Edit3 } from "lucide-react";
+import { Plus, X, Trash2, ExternalLink, Image as ImageIcon, Book, User, Tag, Link as LinkIcon, Save, Edit3, Calendar, FileText, AlignLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { addLibraryBook, deleteLibraryBook, updateLibraryBook } from "@/app/actions/library";
 import { useLanguage } from "@/lib/i18n";
@@ -13,6 +13,9 @@ interface LibraryBook {
   coverImage: string | null;
   driveUrl: string;
   category: string | null;
+  publicationYear?: number | null;
+  pageCount?: number | null;
+  annotation?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,12 +33,15 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
     author: "",
     category: "",
     coverImage: "",
-    driveUrl: ""
+    driveUrl: "",
+    publicationYear: "",
+    pageCount: "",
+    annotation: ""
   });
 
   const handleOpenModal = () => {
     setEditingId(null);
-    setFormData({ title: "", author: "", category: "", coverImage: "", driveUrl: "" });
+    setFormData({ title: "", author: "", category: "", coverImage: "", driveUrl: "", publicationYear: "", pageCount: "", annotation: "" });
     setIsModalOpen(true);
   };
   
@@ -46,7 +52,10 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
       author: book.author || "",
       category: book.category || "",
       coverImage: book.coverImage || "",
-      driveUrl: book.driveUrl
+      driveUrl: book.driveUrl,
+      publicationYear: book.publicationYear ? String(book.publicationYear) : "",
+      pageCount: book.pageCount ? String(book.pageCount) : "",
+      annotation: book.annotation || ""
     });
     setIsModalOpen(true);
   };
@@ -54,7 +63,7 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
-    setFormData({ title: "", author: "", category: "", coverImage: "", driveUrl: "" });
+    setFormData({ title: "", author: "", category: "", coverImage: "", driveUrl: "", publicationYear: "", pageCount: "", annotation: "" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,7 +187,7 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">{editingId ? "Kitobni tahrirlash" : "Yangi kitob qo'shish"}</h3>
               <button onClick={handleCloseModal} className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
@@ -231,6 +240,34 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
               </div>
 
               <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Nashr yili</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input 
+                    type="number" 
+                    value={formData.publicationYear}
+                    onChange={(e) => setFormData({...formData, publicationYear: e.target.value})}
+                    className="w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-900 dark:text-white text-sm"
+                    placeholder="Masalan: 2023"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Sahifalar soni</label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input 
+                    type="number" 
+                    value={formData.pageCount}
+                    onChange={(e) => setFormData({...formData, pageCount: e.target.value})}
+                    className="w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-900 dark:text-white text-sm"
+                    placeholder="Masalan: 250"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Muqova rasmi (URL)</label>
                 <div className="relative">
                   <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -255,6 +292,19 @@ export default function LibraryClient({ initialBooks }: { initialBooks: LibraryB
                     onChange={(e) => setFormData({...formData, driveUrl: e.target.value})}
                     className="w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-900 dark:text-white text-sm"
                     placeholder="https://drive.google.com/..."
+                  />
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Annotatsiya</label>
+                <div className="relative">
+                  <AlignLeft className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                  <textarea 
+                    value={formData.annotation}
+                    onChange={(e) => setFormData({...formData, annotation: e.target.value})}
+                    className="w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-900 dark:text-white text-sm min-h-[100px] resize-y"
+                    placeholder="Kitob haqida qisqacha ma'lumot..."
                   />
                 </div>
               </div>

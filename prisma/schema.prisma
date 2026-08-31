@@ -104,12 +104,15 @@ model MaterialActivity {
 }
 
 model LibraryBook {
-  id         String   @id @default(cuid())
-  title      String
-  author     String?
-  coverImage String?
-  driveUrl   String
-  category   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(cuid())
+  title           String
+  author          String?
+  coverImage      String?
+  driveUrl        String
+  category        String?
+  publicationYear Int?
+  pageCount       Int?
+  annotation      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

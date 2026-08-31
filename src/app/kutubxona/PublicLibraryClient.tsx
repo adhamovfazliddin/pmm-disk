@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Eye, Download, Share2, Image as ImageIcon, ChevronLeft, ChevronRight, Globe, Menu, X, BookOpen, BookMarked, FileText, GraduationCap, Moon, Sun, ZoomIn, ZoomOut } from "lucide-react";
+import { Search, Eye, Download, Share2, Image as ImageIcon, ChevronLeft, ChevronRight, Globe, Menu, X, BookOpen, BookMarked, FileText, GraduationCap, Moon, Sun, ZoomIn, ZoomOut, Star, User, Calendar, AlignLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 type LangType = 'uz' | 'ru' | 'en';
@@ -426,15 +426,30 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
                     className="p-5 flex-1 flex flex-col cursor-pointer"
                     onClick={() => setQuickViewBook(book)}
                   >
-                    <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded uppercase tracking-wider self-start mb-3 border border-amber-200/50">
-                      {book.category || 'KITOB'}
-                    </span>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded uppercase tracking-wider border border-amber-200/50">
+                        {book.category || 'KITOB'}
+                      </span>
+                      <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>124</span>
+                      </div>
+                    </div>
                     <h3 className="font-bold text-slate-900 leading-snug line-clamp-2 text-base group-hover:text-blue-600 transition-colors mb-1.5">
                       {book.title}
                     </h3>
-                    <p className="text-sm text-slate-500 line-clamp-1 mt-auto">
-                      {book.author || 'Noma\'lum muallif'}
-                    </p>
+                    <div className="mt-auto flex items-end justify-between gap-2">
+                      <p className="text-sm text-slate-500 line-clamp-1">
+                        {book.author || 'Noma\'lum muallif'}
+                      </p>
+                      <div className="flex items-center gap-0.5 shrink-0 mb-0.5">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <Star className="w-3.5 h-3.5 fill-slate-200 text-slate-200" />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Actions Footer */}
@@ -660,23 +675,40 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
                   {quickViewBook.title}
                 </h2>
                 
-                <p className="text-lg text-slate-600 mb-6 font-medium">
-                  {quickViewBook.author || 'Noma\'lum muallif'}
-                </p>
+                <div className="flex items-center gap-2 text-lg text-slate-600 mb-6 font-medium">
+                  <User className="w-5 h-5 text-slate-400" />
+                  <p>{quickViewBook.author || 'Noma\'lum muallif'}</p>
+                </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">{translations.yearLabel?.[lang] || "Nashr yili:"}</p>
-                    <p className="font-semibold text-slate-800">{quickViewBook.publicationYear || '2023'}</p>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200">
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-0.5">{translations.yearLabel?.[lang] || "Nashr yili:"}</p>
+                      <p className="font-semibold text-slate-800">{quickViewBook.publicationYear || '2023'}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">{translations.pagesLabel?.[lang] || "Sahifalar soni:"}</p>
-                    <p className="font-semibold text-slate-800">{quickViewBook.pageCount || '150'} {lang === 'uz' ? 'bet' : 'стр.'}</p>
+                  
+                  <div className="hidden sm:block w-px h-10 bg-slate-200"></div>
+
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200">
+                      <FileText className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-0.5">{translations.pagesLabel?.[lang] || "Sahifalar soni:"}</p>
+                      <p className="font-semibold text-slate-800">{quickViewBook.pageCount || '150'} {lang === 'uz' ? 'bet' : 'стр.'}</p>
+                    </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 mb-2 uppercase tracking-wide">{translations.annotationLabel?.[lang] || "Annotatsiya:"}</h4>
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlignLeft className="w-5 h-5 text-slate-400" />
+                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">{translations.annotationLabel?.[lang] || "Annotatsiya:"}</h4>
+                  </div>
                   <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
                     {quickViewBook.annotation || translations.desc[lang]}
                   </p>
@@ -690,16 +722,16 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
                     handleRead(quickViewBook);
                     setQuickViewBook(null);
                   }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
                 >
                   <BookOpen className="w-5 h-5" />
                   <span>{translations.readBook?.[lang] || "O'qish"}</span>
                 </button>
                 <button 
                   onClick={() => handleDownload(quickViewBook.driveUrl)}
-                  className="flex-1 bg-white hover:bg-slate-100 text-slate-700 font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all border border-slate-200 shadow-sm"
+                  className="flex-1 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 hover:text-slate-900 font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
-                  <Download className="w-5 h-5" />
+                  <Download className="w-5 h-5 text-slate-500" />
                   <span>{translations.downloadFull[lang]}</span>
                 </button>
               </div>

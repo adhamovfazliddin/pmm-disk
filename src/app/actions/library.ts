@@ -11,6 +11,9 @@ export async function addLibraryBook(data: any) {
       category: data.category,
       coverImage: data.coverImage,
       driveUrl: data.driveUrl,
+      publicationYear: data.publicationYear ? parseInt(data.publicationYear, 10) : null,
+      pageCount: data.pageCount ? parseInt(data.pageCount, 10) : null,
+      annotation: data.annotation,
     }
   });
 
@@ -36,6 +39,9 @@ export async function updateLibraryBook(id: string, data: any) {
       category: data.category,
       coverImage: data.coverImage,
       driveUrl: data.driveUrl,
+      publicationYear: data.publicationYear ? parseInt(data.publicationYear, 10) : null,
+      pageCount: data.pageCount ? parseInt(data.pageCount, 10) : null,
+      annotation: data.annotation,
     }
   });
 
