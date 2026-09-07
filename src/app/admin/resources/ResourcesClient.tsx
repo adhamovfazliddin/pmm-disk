@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Plus, X, Pencil, Trash2, Video, ExternalLink, BookOpen, Search, Building2, Globe, PlayCircle, Sparkles, Type, Link2, AlignLeft, ShieldCheck, Lock, Loader2, Save, LayoutGrid, List } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { addGlobalResourceAction, deleteGlobalResourceAction, updateGlobalResourceAction } from "@/app/actions/resource";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface Department {
   id: string;
@@ -290,7 +290,7 @@ export default function ResourcesClient({
         </div>
       </div>
 
-      <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+      <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
         {filteredResources.map((resource) => {
           const videoId = resource.type === "video" ? getYouTubeVideoId(resource.url) : null;
           
@@ -303,7 +303,7 @@ export default function ResourcesClient({
                   <div className="w-full h-full bg-slate-900 relative">
                     {videoId ? (
                       <>
-                        <img src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`} alt={resource.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+                        <img src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`} alt={resource.title} loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="w-12 h-12 bg-red-600/90 text-white rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
                             <Video className="w-5 h-5 ml-1" />
@@ -461,7 +461,7 @@ export default function ResourcesClient({
       {isResourceModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
           <div className="bg-white dark:bg-[#111827] rounded-3xl shadow-2xl w-full max-w-3xl border border-slate-200/80 dark:border-slate-800/80 my-8 overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+            <div className="flex justify-between items-center p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white shadow-sm">
                   <Sparkles className="w-5 h-5" />
@@ -478,7 +478,7 @@ export default function ResourcesClient({
               </button>
             </div>
             
-            <div className="overflow-y-auto p-6 custom-scrollbar">
+            <div className="overflow-y-auto p-4 sm:p-6 custom-scrollbar">
               <form id="resource-form" onSubmit={handleSaveResource} className="space-y-8">
                 
                 {/* Asosiy Ma'lumotlar Section */}
@@ -684,7 +684,7 @@ export default function ResourcesClient({
               </form>
             </div>
 
-            <div className="p-5 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end gap-3 shrink-0">
+            <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row justify-end gap-3 shrink-0">
               <button 
                 type="button"
                 onClick={() => setIsResourceModalOpen(false)}

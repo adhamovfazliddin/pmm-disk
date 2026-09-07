@@ -242,7 +242,7 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
             </button>
             <a href="https://andijonpmm.uz/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo2.png" alt="Logo" className="w-12 h-12 md:w-14 md:h-14 object-contain shrink-0" />
+              <img src="/logo2.png" alt="Logo" loading="lazy" decoding="async" className="w-12 h-12 md:w-14 md:h-14 object-contain shrink-0" />
               <div className="flex flex-col uppercase font-bold leading-[1.1] text-[10px] md:text-xs text-white tracking-wide">
                 <span>Andijon viloyati</span>
                 <span>Pedagogik mahorat</span>
@@ -405,6 +405,8 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
                         <img 
                           src={book.coverImage} 
                           alt={book.title} 
+                          loading="lazy"
+                          decoding="async"
                           className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -526,7 +528,7 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
             <div>
               <div className="flex items-center gap-3 mb-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo2.png" alt="Logo" className="w-10 h-10 object-contain shrink-0" />
+                <img src="/logo2.png" alt="Logo" loading="lazy" decoding="async" className="w-10 h-10 object-contain shrink-0" />
                 <div className="flex flex-col uppercase font-bold leading-[1.1] text-sm text-white tracking-wide">
                   <span>Andijon viloyati</span>
                   <span>Pedagogik mahorat</span>
@@ -643,12 +645,14 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
           <div className="bg-white w-full max-w-4xl rounded-2xl md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh]">
             
             {/* Left: Image */}
-            <div className="w-full md:w-2/5 bg-slate-100 relative min-h-[250px] md:min-h-full flex items-center justify-center p-6 border-r border-slate-100">
+            <div className="w-full md:w-2/5 bg-slate-100 relative min-h-[250px] md:min-h-full flex items-center justify-center p-4 sm:p-6 border-r border-slate-100">
               {quickViewBook.coverImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img 
                   src={quickViewBook.coverImage} 
                   alt={quickViewBook.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-auto max-h-[300px] md:max-h-full object-contain rounded-lg shadow-lg"
                 />
               ) : (
@@ -658,7 +662,7 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
 
             {/* Right: Content */}
             <div className="w-full md:w-3/5 flex flex-col bg-white overflow-y-auto">
-              <div className="p-6 md:p-8 flex-1">
+              <div className="p-4 sm:p-6 md:p-8 flex-1">
                 <div className="flex justify-between items-start mb-4">
                   <span className="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full uppercase tracking-wider border border-amber-200/50">
                     {quickViewBook.category || 'KITOB'}
@@ -716,7 +720,7 @@ export default function PublicLibraryClient({ initialBooks }: { initialBooks: Li
               </div>
 
               {/* Actions Footer */}
-              <div className="p-6 md:p-8 border-t border-slate-100 bg-slate-50 flex gap-4 mt-auto shrink-0">
+              <div className="p-4 sm:p-6 md:p-8 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row gap-4 mt-auto shrink-0">
                 <button 
                   onClick={() => {
                     handleRead(quickViewBook);
