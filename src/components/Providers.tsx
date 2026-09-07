@@ -9,7 +9,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
       <LanguageProvider>
         {children}
-        <Toaster position="top-right" richColors closeButton />
       </LanguageProvider>
     </ThemeProvider>
   );

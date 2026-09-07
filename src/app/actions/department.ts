@@ -116,3 +116,33 @@ export async function deleteDepartment(id: string) {
   revalidatePath("/admin/departments");
   return { success: true };
 }
+
+// ✅ Bulk — ko'p kafedrani bir vaqtda faollashtirish/bloklash
+export async function bulkToggleDepartmentStatus(ids: string[], isActive: boolean) {
+  const session = await getSession();
+  if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+
+  await prisma.user.updateMany({
+    where: { id: { in: ids }, role: "DEPARTMENT" },
+    data: { isActive },
+  });
+  revalidatePath("/admin/departments");
+  return { success: true };
+}
+
+// ✅ Bulk — ko'p kafedrani o'chirish
+export async function bulkDeleteDepartments(ids: string[]) {
+  const session = await getSession();
+  if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+
+  try {
+    await prisma.user.deleteMany({
+      where: { id: { in: ids }, role: "DEPARTMENT" },
+    });
+    revalidatePath("/admin/departments");
+    return { success: true };
+  } catch (error) {
+    console.error("Bulk delete departments error:", error);
+    return { error: "O'chirishda xatolik yuz berdi" };
+  }
+}

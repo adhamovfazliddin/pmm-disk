@@ -33,6 +33,12 @@ export async function login(prevState: unknown, formData: FormData) {
     return { error: "Invalid credentials." };
   }
 
+  // Oxirgi kirish vaqtini yangilash
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
+
   await createSession({ userId: user.id, role: user.role, name: user.name });
 
   if (user.role === "SUPERADMIN") {

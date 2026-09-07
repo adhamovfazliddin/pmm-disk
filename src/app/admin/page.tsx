@@ -4,22 +4,32 @@ import AdminClient from "./AdminClient";
 import { getAdminAnalytics } from "@/app/actions/analytics";
 
 export default async function AdminDashboard() {
-  const totalTeachers = await prisma.user.count({ where: { role: "TEACHER" } });
-  const totalMaterials = await prisma.material.count();
-  const globalMaterials = await prisma.material.count({ where: { visibility: "GLOBAL" } });
-  const restrictedMaterials = await prisma.material.count({ where: { visibility: "RESTRICTED" } });
-  const analytics = await getAdminAnalytics();
+  const [
+    totalTeachers,
+    totalMaterials,
+    subjectsGroupBy,
+    recentMaterials,
+    analytics,
+  ] = await Promise.all([
+    prisma.user.count({ where: { role: "TEACHER" } }),
+    prisma.material.count(),
+    prisma.material.groupBy({ by: ['subject'] }),
+    prisma.material.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        subject: true,
+        format: true,
+        createdAt: true,
+        createdBy: { select: { name: true } }
+      }
+    }),
+    getAdminAnalytics(),
+  ]);
 
-  const subjectsGroupBy = await prisma.material.groupBy({
-    by: ['subject'],
-  });
   const activeDepartments = subjectsGroupBy.length;
-
-  const recentMaterials = await prisma.material.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-    include: { createdBy: { select: { name: true } } }
-  });
 
   return (
     <AdminClient

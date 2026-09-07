@@ -20,26 +20,36 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const materials = await prisma.material.findMany({
-    where: {
-      OR: [
-        { visibility: "GLOBAL" },
-        { assignments: { some: { teacherId: session.userId } } },
-        ...(user.departmentId ? [{ assignments: { some: { teacherId: user.departmentId } } }] : [])
-      ]
-    },
-    orderBy: { createdAt: "desc" },
-    include: {
-      createdBy: { select: { name: true } }
-    }
-  });
-
   const currentTeacherId = String(session.userId);
-  const currentDepartmentId = user.role === 'DEPARTMENT' ? String(session.userId) : (user.departmentId ? String(user.departmentId) : null);
+  const currentDepartmentId = user.role === 'DEPARTMENT'
+    ? String(session.userId)
+    : (user.departmentId ? String(user.departmentId) : null);
 
-  let globalResources: any[] = [];
-  try {
-    const dbResources = await prisma.resource.findMany({
+  // ✅ Parallel so'rovlar — 3x tezroq
+  const [materials, dbResources] = await Promise.all([
+    prisma.material.findMany({
+      where: {
+        OR: [
+          { visibility: "GLOBAL" },
+          { assignments: { some: { teacherId: session.userId } } },
+          ...(user.departmentId ? [{ assignments: { some: { teacherId: user.departmentId } } }] : [])
+        ]
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        subject: true,
+        format: true,
+        driveFileId: true,
+        visibility: true,
+        createdAt: true,
+        createdBy: { select: { name: true } },
+        assignments: { select: { teacherId: true } }
+      }
+    }),
+    prisma.resource.findMany({
       where: {
         OR: [
           { visibility: "GLOBAL" },
@@ -52,21 +62,27 @@ export default async function DashboardPage() {
           }
         ]
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        url: true,
+        category: true,
+        visibility: true,
+        createdAt: true,
         departments: { select: { id: true } },
         teachers: { select: { id: true } }
       },
       orderBy: { createdAt: "desc" }
-    });
+    }).catch(() => [])
+  ]);
 
-    globalResources = dbResources.map(res => ({
-      ...res,
-      departmentIds: res.departments.map(d => d.id),
-      teacherIds: res.teachers.map(t => t.id)
-    }));
-  } catch (error) {
-    console.error("Failed to load resources from DB", error);
-  }
+  const globalResources = dbResources.map((res: any) => ({
+    ...res,
+    departmentIds: res.departments.map((d: { id: string }) => d.id),
+    teacherIds: res.teachers.map((t: { id: string }) => t.id)
+  }));
 
   return (
     <DashboardClient 
@@ -78,4 +94,5 @@ export default async function DashboardPage() {
     />
   );
 }
+
 

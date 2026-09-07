@@ -14,6 +14,7 @@ const userSchema = z.object({
   departmentId: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   driveFolderId: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
 });
 
 export async function createTeacher(formData: FormData) {
@@ -43,6 +44,7 @@ export async function createTeacher(formData: FormData) {
         departmentId: parsed.data.departmentId,
         description: parsed.data.description,
         driveFolderId: parsed.data.driveFolderId,
+        phone: parsed.data.phone || null,
       }
     });
     revalidatePath("/admin/teachers");
@@ -71,6 +73,7 @@ export async function updateTeacher(id: string, formData: FormData) {
     departmentId: parsed.data.departmentId,
     description: parsed.data.description,
     driveFolderId: parsed.data.driveFolderId,
+    phone: parsed.data.phone || null,
   };
 
   if (parsed.data.password) {
@@ -127,3 +130,35 @@ export async function deleteTeacher(id: string) {
   }
 }
 
+// ✅ Bulk — ko'p o'qituvchini bir vaqtda faollashtirish/bloklash
+export async function bulkToggleTeacherStatus(ids: string[], isActive: boolean) {
+  const session = await getSession();
+  if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+
+  await prisma.user.updateMany({
+    where: { id: { in: ids }, role: "TEACHER" },
+    data: { isActive },
+  });
+  revalidatePath("/admin/teachers");
+  return { success: true };
+}
+
+// ✅ Bulk — ko'p o'qituvchini o'chirish
+export async function bulkDeleteTeachers(ids: string[]) {
+  const session = await getSession();
+  if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+
+  try {
+    await prisma.$transaction([
+      prisma.materialActivity.deleteMany({ where: { teacherId: { in: ids } } }),
+      prisma.materialAssignment.deleteMany({ where: { teacherId: { in: ids } } }),
+      prisma.user.deleteMany({ where: { id: { in: ids }, role: "TEACHER" } }),
+    ]);
+    revalidatePath("/admin/teachers");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Bulk delete error:", error);
+    return { error: "O'chirishda xatolik yuz berdi" };
+  }
+}

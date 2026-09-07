@@ -3,21 +3,35 @@ import { prisma } from "@/lib/db";
 import DepartmentsClient from "./DepartmentsClient";
 
 export default async function DepartmentsPage() {
-  const [departments] = await Promise.all([
-    prisma.user.findMany({
-      where: { role: "DEPARTMENT" },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        isActive: true,
-        description: true,
-        createdAt: true,
+  const departments = await prisma.user.findMany({
+    where: { role: "DEPARTMENT" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      isActive: true,
+      description: true,
+      driveFolderId: true,
+      createdAt: true,
+      lastLoginAt: true,
+      // O'sha kafedradagi o'qituvchilar ro'yxati
+      teachers: {
+        where: { role: "TEACHER" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          isActive: true,
+        },
+        orderBy: { name: 'asc' },
       },
-      orderBy: { createdAt: "desc" },
-    })
-  ]);
+      _count: {
+        select: { teachers: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   return <DepartmentsClient initialDepartments={departments} />;
 }

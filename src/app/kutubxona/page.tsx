@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/db";
 import PublicLibraryClient from "./PublicLibraryClient";
 
@@ -6,6 +7,18 @@ export default async function PublicLibraryPage() {
 
   try {
     books = await prisma.libraryBook.findMany({
+      select: {
+        id: true,
+        title: true,
+        author: true,
+        coverImage: true,
+        driveUrl: true,
+        category: true,
+        publicationYear: true,
+        pageCount: true,
+        annotation: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: 'desc' }
     });
   } catch (error) {
@@ -16,3 +29,4 @@ export default async function PublicLibraryPage() {
     <PublicLibraryClient initialBooks={books} />
   );
 }
+
