@@ -93,7 +93,7 @@ export async function getAdminAnalytics() {
 
     const topMaterials = topMaterialIds.map(m => {
       const detail = topMaterialDetails.find(d => d.id === m.id);
-      return { id: m.id, title: detail?.title ?? '', subject: detail?.subject ?? '', ...m };
+      return { title: detail?.title ?? '', subject: detail?.subject ?? '', ...m };
     });
 
     // Timeline hisoblash

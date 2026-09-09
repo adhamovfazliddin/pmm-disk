@@ -23,6 +23,8 @@ type TeacherWithStats = {
   isActive: boolean;
   departmentId: string | null;
   department: { name: string } | null;
+  description: string | null;
+  driveFolderId: string | null;
   createdAt: Date;
   lastLoginAt: Date | null;
   stats: TeacherStats;
@@ -55,7 +57,7 @@ function exportToCSV(teachers: TeacherWithStats[]) {
     new Date(t.createdAt).toLocaleDateString("uz-UZ"),
   ]);
 
-  const csv = [header, ...rows].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+  const csv = [header, ...rows].map(row => row.map(cell => `"${cell}"`).join(";")).join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -65,7 +67,7 @@ function exportToCSV(teachers: TeacherWithStats[]) {
   URL.revokeObjectURL(url);
 }
 
-export default function TeachersClient({ initialTeachers }: { initialTeachers: TeacherWithStats[] }) {
+export default function TeachersClient({ initialTeachers, departments }: { initialTeachers: TeacherWithStats[], departments: {id: string, name: string}[] }) {
   const router = useRouter();
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -328,13 +330,14 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                       <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
                         {getInitials(teacher.name)}
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <button
                           onClick={() => router.push(`/admin/teachers/${teacher.id}`)}
-                          className="font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 group"
+                          className="font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left flex items-center gap-1.5 group max-w-full"
+                          title={teacher.name}
                         >
-                          {teacher.name}
-                          <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <span className="truncate">{teacher.name}</span>
+                          <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                         </button>
                         <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                           <Mail className="w-3.5 h-3.5" />
@@ -422,7 +425,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
       {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 dark:bg-[#0B0F17]/80 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in duration-200 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl w-full max-w-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+          <div className="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl w-full max-w-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800/80 flex justify-between items-center bg-slate-50/50 dark:bg-[#111827]/50 sticky top-0 z-10">
               <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -443,7 +446,7 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-              <div className="p-6 overflow-y-auto space-y-5 flex-1">
+              <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-5 flex-1 items-start">
                 {/* Ism */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
@@ -522,42 +525,26 @@ export default function TeachersClient({ initialTeachers }: { initialTeachers: T
                   </div>
                 </div>
 
-                {/* Tavsif */}
-                <div>
+                {/* Kafedrani tanlash */}
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('departmentDescription')}
+                    Kafedrani tanlang
                   </label>
                   <div className="relative">
-                    <Briefcase className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
-                    <textarea
-                      name="description"
-                      rows={2}
-                      defaultValue={editingTeacher?.description || ""}
-                      placeholder="Kafedra yoki mutaxassislik nomi"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400 resize-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Drive Folder */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t('driveFolderLink')}
-                  </label>
-                  <div className="relative">
-                    <Link2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    <input
-                      type="text"
-                      name="driveFolderId"
-                      defaultValue={editingTeacher?.driveFolderId || ""}
-                      onChange={(e) => e.target.value = extractDriveId(e.target.value)}
-                      placeholder="https://drive.google.com/drive/folders/..."
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400"
-                    />
-                  </div>
-                  <div className="flex items-start gap-2 mt-2">
-                    <Info className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">O'qituvchining shaxsiy Google Drive jildiga havola</p>
+                    <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <select
+                      name="departmentId"
+                      defaultValue={editingTeacher?.departmentId || ""}
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="">-- Kafedraga biriktirmaslik --</option>
+                      {departments.map(dep => (
+                        <option key={dep.id} value={dep.id}>
+                          {dep.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
               </div>

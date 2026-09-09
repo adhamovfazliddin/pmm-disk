@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import TeachersClient from "./TeachersClient";
 
 export default async function TeachersPage() {
-  const [teachers, activityStats] = await Promise.all([
+  const [teachers, activityStats, departments] = await Promise.all([
     prisma.user.findMany({
       where: { role: "TEACHER" },
       select: {
@@ -15,6 +15,8 @@ export default async function TeachersPage() {
         isActive: true,
         departmentId: true,
         department: { select: { name: true } },
+        description: true,
+        driveFolderId: true,
         createdAt: true,
         lastLoginAt: true,
         _count: {
@@ -23,13 +25,18 @@ export default async function TeachersPage() {
           }
         }
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
     }),
     // Ko'rish va yuklab olish soni — groupBy bilan samarali
     prisma.materialActivity.groupBy({
       by: ['teacherId', 'actionType'],
       _count: { id: true },
       where: { teacherId: { not: null } },
+    }),
+    prisma.user.findMany({
+      where: { role: "DEPARTMENT" },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
     }),
   ]);
 
@@ -51,5 +58,5 @@ export default async function TeachersPage() {
     };
   });
 
-  return <TeachersClient initialTeachers={teachersWithStats} />;
+  return <TeachersClient initialTeachers={teachersWithStats} departments={departments} />;
 }

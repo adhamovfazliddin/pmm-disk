@@ -30,7 +30,7 @@ export default async function DepartmentsPage() {
         select: { teachers: true },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" },
   });
 
   return <DepartmentsClient initialDepartments={departments} />;

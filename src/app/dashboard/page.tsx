@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { name: true, description: true, driveFolderId: true, departmentId: true, role: true }
+    select: { name: true, description: true, driveFolderId: true, departmentId: true, role: true, department: { select: { driveFolderId: true } } }
   });
 
   if (!user) {
@@ -88,8 +88,9 @@ export default async function DashboardPage() {
     <DashboardClient 
       initialMaterials={materials} 
       sessionName={user.name} 
+      role={user.role}
       description={user.description} 
-      driveFolderId={user.driveFolderId} 
+      driveFolderId={user.driveFolderId || user.department?.driveFolderId} 
       initialGlobalResources={globalResources}
     />
   );

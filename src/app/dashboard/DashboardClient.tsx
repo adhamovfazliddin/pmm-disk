@@ -71,12 +71,14 @@ export function getYouTubeEmbedUrl(url: string): string | null {
 export default function DashboardClient({ 
   initialMaterials, 
   sessionName,
+  role,
   description,
   driveFolderId,
   initialGlobalResources
 }: { 
   initialMaterials: Material[], 
   sessionName: string,
+  role?: string,
   description?: string | null,
   driveFolderId?: string | null,
   initialGlobalResources?: any[]
@@ -226,7 +228,9 @@ export default function DashboardClient({
             <div className="p-2.5 bg-blue-100/50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl">
               <Building className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-bold text-blue-950 dark:text-white transition-colors">{t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli"}</h1>
+            <h1 className="text-2xl font-bold text-blue-950 dark:text-white transition-colors">
+              {role === "TEACHER" ? "O'qituvchi Boshqaruv Paneli" : (t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli")}
+            </h1>
           </div>
           <div className="mt-4 flex items-center">
              <span className="bg-blue-100/60 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200/50 dark:border-blue-800/50">
@@ -260,7 +264,7 @@ export default function DashboardClient({
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
             }`}
           >
-            📁 {t('tabDriveFolder') || "Kafedra Drive Jildi"}
+            📁 {role === "TEACHER" ? "O'qituvchi Drive Jildi" : (t('tabDriveFolder') || "Kafedra Drive Jildi")}
           </button>
         )}
         <button

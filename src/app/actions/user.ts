@@ -41,7 +41,7 @@ export async function createTeacher(formData: FormData) {
         name: parsed.data.name,
         password: hashedPassword,
         role: Role.TEACHER,
-        departmentId: parsed.data.departmentId,
+        departmentId: parsed.data.departmentId || null,
         description: parsed.data.description,
         driveFolderId: parsed.data.driveFolderId,
         phone: parsed.data.phone || null,
@@ -70,7 +70,7 @@ export async function updateTeacher(id: string, formData: FormData) {
   const updateData: Record<string, unknown> = {
     email: parsed.data.email,
     name: parsed.data.name,
-    departmentId: parsed.data.departmentId,
+    departmentId: parsed.data.departmentId || null,
     description: parsed.data.description,
     driveFolderId: parsed.data.driveFolderId,
     phone: parsed.data.phone || null,
