@@ -76,13 +76,13 @@ export default function DepartmentDetailClient({ department, chartData, material
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Left Column: Profile Card */}
         <div className="space-y-6 lg:col-span-1">
           <div className="bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             {/* Cover gradient */}
             <div className="h-24 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
-            
+
             <div className="px-6 pb-6 relative">
               {/* Avatar */}
               <div className="w-20 h-20 rounded-2xl bg-white dark:bg-slate-800 p-1.5 absolute -top-10 shadow-sm border border-slate-100 dark:border-slate-700">
@@ -155,7 +155,7 @@ export default function DepartmentDetailClient({ department, chartData, material
 
                 {department.driveFolderId && (
                   <div className="flex items-center gap-3 text-sm pt-2">
-                    <a 
+                    <a
                       href={department.driveFolderId.startsWith('http') ? department.driveFolderId : `https://drive.google.com/drive/folders/${department.driveFolderId}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -168,7 +168,7 @@ export default function DepartmentDetailClient({ department, chartData, material
               </div>
             </div>
           </div>
-          
+
           {/* Teachers List Card */}
           <div className="bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
@@ -208,7 +208,7 @@ export default function DepartmentDetailClient({ department, chartData, material
 
         {/* Right Column: Stats & Charts */}
         <div className="space-y-6 lg:col-span-2">
-          
+
           {/* Stats Row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
             <div className="bg-white dark:bg-[#111827]/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm flex flex-col justify-center">
@@ -220,7 +220,7 @@ export default function DepartmentDetailClient({ department, chartData, material
                 {department.stats.teachersCount}
               </div>
             </div>
-            
+
             <div className="bg-white dark:bg-[#111827]/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm flex flex-col justify-center">
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-2">
                 <BookOpen className="w-4 h-4 text-blue-500" />
@@ -264,38 +264,38 @@ export default function DepartmentDetailClient({ department, chartData, material
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#64748b' }}
                     dy={10}
                   />
-                  <YAxis 
+                  <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#64748b' }}
                     allowDecimals={false}
                   />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
                     cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
                   />
                   <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                  <Line 
+                  <Line
                     name="Ko'rishlar"
-                    type="monotone" 
-                    dataKey="view" 
-                    stroke="#10b981" 
+                    type="monotone"
+                    dataKey="view"
+                    stroke="#10b981"
                     strokeWidth={3}
                     dot={false}
                     activeDot={{ r: 6, strokeWidth: 0 }}
                   />
-                  <Line 
+                  <Line
                     name="Yuklamalar"
-                    type="monotone" 
-                    dataKey="download" 
-                    stroke="#6366f1" 
+                    type="monotone"
+                    dataKey="download"
+                    stroke="#6366f1"
                     strokeWidth={3}
                     dot={false}
                     activeDot={{ r: 6, strokeWidth: 0 }}
@@ -316,7 +316,7 @@ export default function DepartmentDetailClient({ department, chartData, material
                 Oxirgi {materials.length} ta
               </span>
             </div>
-            
+
             <div className="p-0">
               {materials.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center">

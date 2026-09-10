@@ -57,7 +57,7 @@ export default function AppLayout({ children, role, email, name, department }: {
               </Link>
             )
           })}
-          {role === "TEACHER" && (
+          {(role === "TEACHER" || role === "DEPARTMENT") && (
             <Link 
               href="/dashboard" 
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${

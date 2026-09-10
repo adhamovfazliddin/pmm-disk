@@ -9,6 +9,7 @@ import { recordMaterialActivity } from "@/app/actions/analytics";
 import { fetchDriveFiles, DriveFile } from "@/app/actions/drive";
 import MaterialPreviewModal from "@/components/MaterialPreviewModal";
 import { toast } from "sonner";
+import { toggleBookmark as toggleBookmarkAction } from "@/app/actions/bookmark";
 
 const FORMAT_ICONS = {
   PDF: <div className="p-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg shrink-0"><FileText className="w-5 h-5" /></div>,
@@ -74,14 +75,16 @@ export default function DashboardClient({
   role,
   description,
   driveFolderId,
-  initialGlobalResources
+  initialGlobalResources,
+  initialBookmarks
 }: { 
   initialMaterials: Material[], 
   sessionName: string,
   role?: string,
   description?: string | null,
   driveFolderId?: string | null,
-  initialGlobalResources?: any[]
+  initialGlobalResources?: any[],
+  initialBookmarks: string[]
 }) {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +92,7 @@ export default function DashboardClient({
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
-  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(initialBookmarks || []);
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [activeTab, setActiveTab] = useState<"drive" | "platform" | "resources">(driveFolderId ? "drive" : "platform");
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
@@ -151,27 +154,37 @@ export default function DashboardClient({
       if (savedMode === 'grid' || savedMode === 'table') {
         setViewMode(savedMode);
       }
-      const savedBookmarks = localStorage.getItem('teacher_bookmarked_ids');
-      if (savedBookmarks) {
-        setBookmarkedIds(JSON.parse(savedBookmarks));
-      }
     } catch (e) {
-      // localStorage may be unavailable (SSR, private browsing)
       console.warn('Failed to read from localStorage:', e);
     }
   }, []);
 
-  const toggleBookmark = (id: string) => {
-    let newBookmarks;
-    if (bookmarkedIds.includes(id)) {
-      newBookmarks = bookmarkedIds.filter(bId => bId !== id);
-      toast.success("Olib tashlandi");
-    } else {
-      newBookmarks = [...bookmarkedIds, id];
-      toast.success("Saqlandi");
+  const toggleBookmark = async (id: string) => {
+    const isBookmarked = bookmarkedIds.includes(id);
+    
+    // Optimistic update
+    setBookmarkedIds(prev => 
+      isBookmarked ? prev.filter(bId => bId !== id) : [...prev, id]
+    );
+
+    try {
+      const res = await toggleBookmarkAction(id);
+      if (res.error) {
+        // Rollback on error
+        toast.error(res.error);
+        setBookmarkedIds(prev => 
+          isBookmarked ? [...prev, id] : prev.filter(bId => bId !== id)
+        );
+      } else {
+        toast.success(res.bookmarked ? "Saqlandi" : "Olib tashlandi");
+      }
+    } catch (err) {
+      // Rollback on error
+      toast.error("Xatolik yuz berdi");
+      setBookmarkedIds(prev => 
+        isBookmarked ? [...prev, id] : prev.filter(bId => bId !== id)
+      );
     }
-    setBookmarkedIds(newBookmarks);
-    localStorage.setItem('teacher_bookmarked_ids', JSON.stringify(newBookmarks));
   };
 
   const handleViewModeChange = (mode: "grid" | "table") => {
@@ -229,7 +242,7 @@ export default function DashboardClient({
               <Building className="w-6 h-6" />
             </div>
             <h1 className="text-2xl font-bold text-blue-950 dark:text-white transition-colors">
-              {role === "TEACHER" ? "O'qituvchi Boshqaruv Paneli" : (t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli")}
+              {role === "TEACHER" ? (t('teacherDashboardTitle') || "O'qituvchi Boshqaruv Paneli") : (t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli")}
             </h1>
           </div>
           <div className="mt-4 flex items-center">
@@ -264,7 +277,7 @@ export default function DashboardClient({
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
             }`}
           >
-            📁 {role === "TEACHER" ? "O'qituvchi Drive Jildi" : (t('tabDriveFolder') || "Kafedra Drive Jildi")}
+            📁 {role === "TEACHER" ? (t('teacherDriveFolder') || "O'qituvchi Drive Jildi") : (t('tabDriveFolder') || "Kafedra Drive Jildi")}
           </button>
         )}
         <button

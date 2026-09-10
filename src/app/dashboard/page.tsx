@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     : (user.departmentId ? String(user.departmentId) : null);
 
   // ✅ Parallel so'rovlar — 3x tezroq
-  const [materials, dbResources] = await Promise.all([
+  const [materials, dbResources, dbBookmarks] = await Promise.all([
     prisma.material.findMany({
       where: {
         OR: [
@@ -75,6 +75,10 @@ export default async function DashboardPage() {
         teachers: { select: { id: true } }
       },
       orderBy: { createdAt: "desc" }
+    }).catch(() => []),
+    prisma.bookmark.findMany({
+      where: { userId: currentTeacherId },
+      select: { itemId: true }
     }).catch(() => [])
   ]);
 
@@ -84,6 +88,8 @@ export default async function DashboardPage() {
     teacherIds: res.teachers.map((t: { id: string }) => t.id)
   }));
 
+  const initialBookmarks = dbBookmarks.map(b => b.itemId);
+
   return (
     <DashboardClient 
       initialMaterials={materials} 
@@ -92,6 +98,7 @@ export default async function DashboardPage() {
       description={user.description} 
       driveFolderId={user.driveFolderId || user.department?.driveFolderId} 
       initialGlobalResources={globalResources}
+      initialBookmarks={initialBookmarks}
     />
   );
 }

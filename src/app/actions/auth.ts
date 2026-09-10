@@ -39,7 +39,9 @@ export async function login(prevState: unknown, formData: FormData) {
     data: { lastLoginAt: new Date() },
   });
 
-  await createSession({ userId: user.id, role: user.role, name: user.name });
+  const rememberMe = formData.get("rememberMe") === "on";
+
+  await createSession({ userId: user.id, role: user.role, name: user.name }, rememberMe);
 
   if (user.role === "SUPERADMIN") {
     redirect("/admin");

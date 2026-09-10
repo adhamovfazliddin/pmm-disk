@@ -224,7 +224,30 @@ export default function LoginPage() {
               </div>
             )}
 
-            <div className="pt-4">
+            {/* Eslab qolish checkbox */}
+            <div className="flex items-start gap-3 pt-1">
+              <div className="relative flex items-center mt-0.5">
+                <input
+                  id="rememberMe"
+                  name="rememberMe"
+                  type="checkbox"
+                  className="peer w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 bg-slate-50 dark:bg-[#0B0F17]/50 focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-0 cursor-pointer transition-all"
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="rememberMe" className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                  {language === 'UZ' ? "Eslab qolish (30 kun)" : "Запомнить меня (30 дней)"}
+                </label>
+                <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium flex items-center gap-1">
+                  <span>⚠</span>
+                  {language === 'UZ'
+                    ? "Begona qurilmada belgilamang!"
+                    : "Не отмечайте на чужом устройстве!"}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={isPending}

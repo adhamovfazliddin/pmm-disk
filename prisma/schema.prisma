@@ -46,6 +46,20 @@ model User {
 
   departmentResources Resource[] @relation("ResourceDepartments")
   teacherResources    Resource[] @relation("ResourceTeachers")
+  
+  bookmarks           Bookmark[]
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  itemId    String
+  
+  createdAt DateTime @default(now())
+
+  @@unique([userId, itemId])
 }
 
 model Resource {
