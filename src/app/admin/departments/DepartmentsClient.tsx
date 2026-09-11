@@ -252,8 +252,8 @@ export default function DepartmentsClient({ initialDepartments }: { initialDepar
 
       {/* Table */}
       <div className="bg-white/80 dark:bg-[#111827]/90 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm overflow-hidden backdrop-blur-md">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/80 dark:border-slate-800/80 text-sm">
                 <th className="p-4 w-10">

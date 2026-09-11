@@ -294,8 +294,8 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
         </div>
       ) : (
         <div className="backdrop-blur-md bg-white/90 dark:bg-[#111827]/90 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 overflow-hidden transition-colors">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-max">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/80 dark:border-slate-700/50 text-sm">
                 <th className="p-4 font-semibold text-slate-600 dark:text-slate-300 w-12 text-center">№</th>

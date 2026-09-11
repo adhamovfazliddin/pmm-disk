@@ -610,8 +610,8 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              <div className="p-5 flex-1">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2" title={material.title}>
+              <div className="p-4 flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1.5 line-clamp-2 leading-snug" title={material.title}>
                   {material.title}
                 </h3>
 
@@ -627,36 +627,56 @@ export default function DashboardClient({
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      const url = material.webViewLink || `https://drive.google.com/file/d/${material.driveFileId}/view`;
-                      navigator.clipboard.writeText(url);
-                      toast.success("Nusxa olindi");
-                    }}
-                    className="flex-none flex items-center justify-center p-2 text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 dark:bg-slate-700/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 rounded-md transition-colors"
-                    title="Ulashish (Nusxa olish)"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedMaterial(material);
-                      setIsPreviewOpen(true);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 px-3 py-2 rounded-md transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4" /> {t('preview')}
-                  </button>
+                <div className="flex flex-col gap-2">
+                  {/* Google Drive-da ochish — asosiy tugma */}
                   <a
-                    href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
+                    href={`https://drive.google.com/file/d/${material.driveFileId}/view`}
                     target="_blank"
-                    rel="noreferrer"
-                    onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD').catch(console.error)}
-                    className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 px-3 py-2 rounded-md transition-colors"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 px-3 py-2.5 rounded-xl transition-all shadow-sm"
                   >
-                    <Download className="w-4 h-4" /> {t('download')}
+                    <svg className="w-4 h-4" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066DA"/>
+                      <path d="M43.65 25L29.9 1.2C28.55.4 27 0 25.45 0c-1.55 0-3.1.4-4.5 1.2L6.6 26.55 27.5 53l16.15-28z" fill="#00AC47"/>
+                      <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H60.1L73.55 76.8z" fill="#EA4335"/>
+                      <path d="M43.65 25L59.8.4C58.4-.2 56.9-.1 55.45.5c-.75.3-1.4.75-1.95 1.3L27.5 53l16.15-28z" fill="#00832D"/>
+                      <path d="M60.1 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h48.55c1.6 0 3.1-.45 4.5-1.2L60.1 53z" fill="#2684FC"/>
+                      <path d="M73.4 26.55L59.65 2.75C58.85 1.4 57.7.3 56.35-.5L43.65 25 60.1 53h27.2c0-1.55-.4-3.1-1.2-4.5L73.4 26.55z" fill="#FFBA00"/>
+                    </svg>
+                    {t('openInDrive')}
                   </a>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const url = material.webViewLink || `https://drive.google.com/file/d/${material.driveFileId}/view`;
+                        navigator.clipboard.writeText(url);
+                        toast.success("Nusxa olindi");
+                      }}
+                      className="flex-none flex items-center justify-center p-2 text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 dark:bg-slate-700/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 rounded-md transition-colors"
+                      title="Ulashish (Nusxa olish)"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedMaterial(material);
+                        setIsPreviewOpen(true);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 px-3 py-2 rounded-md transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" /> {t('preview')}
+                    </button>
+                    <a
+                      href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD').catch(console.error)}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 px-3 py-2 rounded-md transition-colors"
+                    >
+                      <Download className="w-4 h-4" /> {t('download')}
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -664,8 +684,8 @@ export default function DashboardClient({
         </div>
       ) : (
         <div className="backdrop-blur-md bg-white/90 dark:bg-[#111827]/90 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 overflow-hidden transition-colors">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-max">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
                 <tr className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/80 dark:border-slate-700/50">
                   <th className="p-4 font-semibold text-slate-600 dark:text-slate-300 w-12 text-center">№</th>
@@ -680,19 +700,39 @@ export default function DashboardClient({
                 {displayMaterials.map((material, index) => (
                   <tr key={material.id} className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all group">
                     <td className="p-4 text-center font-medium text-slate-500">{index + 1}</td>
-                    <td className="p-4 align-middle font-medium text-slate-900 dark:text-slate-100 max-w-xs">
-                      <div className="flex items-center gap-3">
-                        {material.thumbnailLink ? (
-                          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
-                            <img src={material.thumbnailLink} alt={material.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <td className="p-4 align-middle font-medium text-slate-900 dark:text-slate-100 max-w-md">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {material.thumbnailLink ? (
+                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
+                              <img src={material.thumbnailLink} alt={material.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                          ) : (
+                            FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <div className="p-2 bg-slate-100 dark:bg-[#1E293B]/60 rounded-lg shrink-0"><File className="w-5 h-5 text-gray-500" /></div>
+                          )}
+                          <div className="flex flex-col min-w-0 gap-0.5">
+                            <span className="truncate font-semibold text-gray-900 dark:text-white">{material.title}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 truncate">{material.description || ""}</span>
                           </div>
-                        ) : (
-                          FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <div className="p-2 bg-slate-100 dark:bg-[#1E293B]/60 rounded-lg shrink-0"><File className="w-5 h-5 text-gray-500" /></div>
-                        )}
-                        <div className="flex flex-col min-w-0 gap-0.5">
-                          <span className="truncate font-semibold text-gray-900 dark:text-white">{material.title}</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 truncate">{material.description || ""}</span>
                         </div>
+
+                        {/* Google Drive tugmasi (Ro'yxat ko'rinishi uchun) */}
+                        <a
+                          href={`https://drive.google.com/file/d/${material.driveFileId}/view`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg transition-all border border-slate-200 dark:border-slate-700 shadow-sm"
+                        >
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066DA"/>
+                            <path d="M43.65 25L29.9 1.2C28.55.4 27 0 25.45 0c-1.55 0-3.1.4-4.5 1.2L6.6 26.55 27.5 53l16.15-28z" fill="#00AC47"/>
+                            <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H60.1L73.55 76.8z" fill="#EA4335"/>
+                            <path d="M43.65 25L59.8.4C58.4-.2 56.9-.1 55.45.5c-.75.3-1.4.75-1.95 1.3L27.5 53l16.15-28z" fill="#00832D"/>
+                            <path d="M60.1 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h48.55c1.6 0 3.1-.45 4.5-1.2L60.1 53z" fill="#2684FC"/>
+                            <path d="M73.4 26.55L59.65 2.75C58.85 1.4 57.7.3 56.35-.5L43.65 25 60.1 53h27.2c0-1.55-.4-3.1-1.2-4.5L73.4 26.55z" fill="#FFBA00"/>
+                          </svg>
+                          Google Drive
+                        </a>
                       </div>
                     </td>
                     <td className="p-4 align-middle">

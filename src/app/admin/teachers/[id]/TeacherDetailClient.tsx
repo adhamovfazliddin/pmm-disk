@@ -114,6 +114,18 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                   </div>
                 </div>
 
+                {teacher.description && (
+                  <div className="flex items-start gap-3 text-sm pt-2 pb-1 border-y border-slate-100 dark:border-slate-800/50 my-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-500 shrink-0 mt-0.5">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Tavsif (Ilmiy unvon, ma'lumot)</p>
+                      <p className="font-medium text-slate-800 dark:text-slate-200 leading-relaxed mt-0.5">{teacher.description}</p>
+                    </div>
+                  </div>
+                )}
+
                 {teacher.phone && (
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">

@@ -43,12 +43,13 @@ function formatLastLogin(date: Date | null): string {
 }
 
 function exportToCSV(teachers: TeacherWithStats[]) {
-  const header = ["Ism", "Email", "Telefon", "Kafedra", "Status", "Materiallar", "Ko'rishlar", "Yuklamalar", "Oxirgi kirish", "Qo'shilgan sana"];
+  const header = ["Ism", "Email", "Telefon", "Kafedra", "Ilmiy unvon, daraja va qo'shimcha ma'lumotlar", "Status", "Materiallar", "Ko'rishlar", "Yuklamalar", "Oxirgi kirish", "Qo'shilgan sana"];
   const rows = teachers.map(t => [
     t.name,
     t.email,
     t.phone || "-",
     t.department?.name || "-",
+    t.description?.replace(/"/g, '""') || "-",
     t.isActive ? "Faol" : "Nofaol",
     t.stats.materials,
     t.stats.views,
@@ -273,8 +274,8 @@ export default function TeachersClient({ initialTeachers, departments }: { initi
 
       {/* Table */}
       <div className="bg-white/80 dark:bg-[#111827]/90 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm overflow-hidden backdrop-blur-md transition-colors">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/80 dark:border-slate-800/80 text-sm">
                 <th className="p-4 w-10">
@@ -545,6 +546,23 @@ export default function TeachersClient({ initialTeachers, departments }: { initi
                       ))}
                     </select>
                     <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Tavsif (Ilmiy unvoni, qo'shimcha ma'lumotlar) */}
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Tavsif (Ilmiy unvon, daraja va qo'shimcha ma'lumotlar)
+                  </label>
+                  <div className="relative">
+                    <Info className="absolute left-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <textarea
+                      name="description"
+                      defaultValue={editingTeacher?.description || ""}
+                      rows={3}
+                      placeholder="Masalan: Pedagogika fanlari nomzodi, dotsent..."
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B]/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400 resize-y"
+                    />
                   </div>
                 </div>
               </div>
