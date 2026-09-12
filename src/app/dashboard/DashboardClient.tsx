@@ -5,7 +5,7 @@ import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink,
 import { extractDriveFolderId } from "@/lib/drive";
 
 import { useLanguage } from "@/lib/i18n";
-import { recordMaterialActivity } from "@/app/actions/analytics";
+import { recordMaterialActivity, recordDriveActivity, getDriveStats } from "@/app/actions/analytics";
 import { fetchDriveFiles, DriveFile } from "@/app/actions/drive";
 import MaterialPreviewModal from "@/components/MaterialPreviewModal";
 import { toast } from "sonner";
@@ -76,7 +76,8 @@ export default function DashboardClient({
   description,
   driveFolderId,
   initialGlobalResources,
-  initialBookmarks
+  initialBookmarks,
+  personalStats
 }: { 
   initialMaterials: Material[], 
   sessionName: string,
@@ -84,7 +85,8 @@ export default function DashboardClient({
   description?: string | null,
   driveFolderId?: string | null,
   initialGlobalResources?: any[],
-  initialBookmarks: string[]
+  initialBookmarks: string[],
+  personalStats?: { materials: number, views: number, downloads: number }
 }) {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,6 +100,12 @@ export default function DashboardClient({
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [isLoadingDrive, setIsLoadingDrive] = useState(false);
   const [driveError, setDriveError] = useState("");
+  const [driveStats, setDriveStats] = useState({ views: 0, downloads: 0 });
+
+  // Active tab bo'yicha statistika
+  const displayStats = activeTab === "drive"
+    ? { materials: driveFiles.length, views: driveStats.views, downloads: driveStats.downloads }
+    : personalStats;
   
   const [localResources, setLocalResources] = useState(initialGlobalResources || []);
   const [resourceSearch, setResourceSearch] = useState("");
@@ -129,6 +137,11 @@ export default function DashboardClient({
             setDriveFiles(files);
             if (files.length === 0) {
               setDriveError("Bu jildda hech qanday fayl topilmadi yoki jild ochiq emas.");
+            } else {
+              // Get actual stats from DB for these drive files
+              const fileIds = files.map(f => f.id);
+              const stats = await getDriveStats(fileIds);
+              setDriveStats(stats);
             }
           }
         } catch (error) {
@@ -235,33 +248,83 @@ export default function DashboardClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 bg-slate-50 dark:bg-slate-900/50 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-100/50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl">
-              <Building className="w-6 h-6" />
-            </div>
-            <h1 className="text-2xl font-bold text-blue-950 dark:text-white transition-colors">
-              {role === "TEACHER" ? (t('teacherDashboardTitle') || "O'qituvchi Boshqaruv Paneli") : (t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli")}
-            </h1>
-          </div>
-          <div className="mt-4 flex items-center">
-             <span className="bg-blue-100/60 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200/50 dark:border-blue-800/50">
-               {sessionName}
-             </span>
-          </div>
-          {description && <p className="text-gray-600 dark:text-gray-400 mt-4 max-w-3xl leading-relaxed text-sm md:text-base">{description}</p>}
+      {/* Top Header Section */}
+      <div className="bg-white dark:bg-[#111827]/90 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 p-6 md:p-8 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
+        
+        {/* Left side: Profile */}
+        <div className="flex-1 flex flex-col w-full">
+           <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-100/50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl">
+                 <Building className="w-8 h-8" />
+              </div>
+              <div>
+                 <h1 className="text-xl md:text-2xl font-bold text-blue-950 dark:text-white transition-colors">
+                   {role === "TEACHER" ? (t('teacherDashboardTitle') || "O'qituvchi Boshqaruv Paneli") : (t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli")}
+                 </h1>
+                 <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+                   <span className="text-blue-700 dark:text-blue-400 font-semibold">{sessionName}</span>
+                   {description && <span className="text-sm text-slate-500 dark:text-slate-400 border-l border-slate-300 dark:border-slate-700 pl-3">{description}</span>}
+                 </div>
+              </div>
+           </div>
+           
+           {driveFolderId && (
+             <div className="mt-6 flex">
+                <a 
+                  href={getFullDriveUrl(driveFolderId)}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-5 py-2.5 rounded-xl transition-all shadow-sm font-semibold text-sm w-full sm:w-auto"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066DA"/>
+                    <path d="M43.65 25L29.9 1.2C28.55.4 27 0 25.45 0c-1.55 0-3.1.4-4.5 1.2L6.6 26.55 27.5 53l16.15-28z" fill="#00AC47"/>
+                    <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H60.1L73.55 76.8z" fill="#EA4335"/>
+                    <path d="M43.65 25L59.8.4C58.4-.2 56.9-.1 55.45.5c-.75.3-1.4.75-1.95 1.3L27.5 53l16.15-28z" fill="#00832D"/>
+                    <path d="M60.1 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h48.55c1.6 0 3.1-.45 4.5-1.2L60.1 53z" fill="#2684FC"/>
+                    <path d="M73.4 26.55L59.65 2.75C58.85 1.4 57.7.3 56.35-.5L43.65 25 60.1 53h27.2c0-1.55-.4-3.1-1.2-4.5L73.4 26.55z" fill="#FFBA00"/>
+                  </svg>
+                  {t('openInDrive')}
+                </a>
+             </div>
+           )}
         </div>
-        {driveFolderId && (
-          <div className="shrink-0 pt-2 md:pt-0">
-            <a 
-              href={getFullDriveUrl(driveFolderId)}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 font-bold cursor-pointer"
-            >
-              <ExternalLink className="w-5 h-5" /> {t('openInDrive') || "Google Drive orqali ochish"}
-            </a>
+
+        {/* Right side: Stats */}
+        {displayStats && (
+          <div className="xl:w-auto w-full">
+            <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-4 border-b border-slate-100 dark:border-slate-800 pb-2 xl:hidden">{t('personalStats')}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 xl:w-[150px]">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('statMaterial')}</p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white leading-none mt-1">{displayStats.materials}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 xl:w-[150px]">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <Eye className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('statViews')}</p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white leading-none mt-1">{displayStats.views}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 xl:w-[150px]">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                  <Download className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('statDownloads')}</p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white leading-none mt-1">{displayStats.downloads}</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -662,6 +725,9 @@ export default function DashboardClient({
                       onClick={() => {
                         setSelectedMaterial(material);
                         setIsPreviewOpen(true);
+                        // Drive fayl ko'rish statistikasi
+                        setDriveStats(prev => ({ ...prev, views: prev.views + 1 }));
+                        recordDriveActivity(material.driveFileId, 'VIEW').catch(console.error);
                       }}
                       className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 px-3 py-2 rounded-md transition-colors"
                     >
@@ -671,7 +737,11 @@ export default function DashboardClient({
                       href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
                       target="_blank"
                       rel="noreferrer"
-                      onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD').catch(console.error)}
+                      onClick={() => {
+                        // Drive fayl yuklash statistikasi
+                        setDriveStats(prev => ({ ...prev, downloads: prev.downloads + 1 }));
+                        recordDriveActivity(material.driveFileId, 'DOWNLOAD').catch(console.error);
+                      }}
                       className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 px-3 py-2 rounded-md transition-colors"
                     >
                       <Download className="w-4 h-4" /> {t('download')}
@@ -773,6 +843,13 @@ export default function DashboardClient({
                           onClick={() => {
                             setSelectedMaterial(material);
                             setIsPreviewOpen(true);
+                            // Drive fayl bo'lsa statistika oshirish
+                            if (activeTab === "drive") {
+                              setDriveStats(prev => ({ ...prev, views: prev.views + 1 }));
+                              recordDriveActivity(material.driveFileId, 'VIEW').catch(console.error);
+                            } else {
+                              recordMaterialActivity(material.id, 'VIEW').catch(console.error);
+                            }
                           }}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-500/10 rounded-xl transition-all"
                           title={t('preview')}
@@ -783,7 +860,14 @@ export default function DashboardClient({
                           href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
                           target="_blank"
                           rel="noreferrer"
-                          onClick={() => recordMaterialActivity(material.id, 'DOWNLOAD').catch(console.error)}
+                          onClick={() => {
+                            if (activeTab === "drive") {
+                              setDriveStats(prev => ({ ...prev, downloads: prev.downloads + 1 }));
+                              recordDriveActivity(material.driveFileId, 'DOWNLOAD').catch(console.error);
+                            } else {
+                              recordMaterialActivity(material.id, 'DOWNLOAD').catch(console.error);
+                            }
+                          }}
                           className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
                           title={t('download')}
                         >

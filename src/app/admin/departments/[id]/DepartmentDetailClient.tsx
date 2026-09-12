@@ -159,9 +159,17 @@ export default function DepartmentDetailClient({ department, chartData, material
                       href={department.driveFolderId.startsWith('http') ? department.driveFolderId : `https://drive.google.com/drive/folders/${department.driveFolderId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 font-medium rounded-xl transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800 dark:text-slate-300 rounded-xl transition-colors font-semibold text-sm border border-slate-200 dark:border-slate-700 shadow-sm"
                     >
-                      <Link2 className="w-4 h-4" /> Google Drive Jildi
+                      <svg className="w-4 h-4" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066DA"/>
+                        <path d="M43.65 25L29.9 1.2C28.55.4 27 0 25.45 0c-1.55 0-3.1.4-4.5 1.2L6.6 26.55 27.5 53l16.15-28z" fill="#00AC47"/>
+                        <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H60.1L73.55 76.8z" fill="#EA4335"/>
+                        <path d="M43.65 25L59.8.4C58.4-.2 56.9-.1 55.45.5c-.75.3-1.4.75-1.95 1.3L27.5 53l16.15-28z" fill="#00832D"/>
+                        <path d="M60.1 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h48.55c1.6 0 3.1-.45 4.5-1.2L60.1 53z" fill="#2684FC"/>
+                        <path d="M73.4 26.55L59.65 2.75C58.85 1.4 57.7.3 56.35-.5L43.65 25 60.1 53h27.2c0-1.55-.4-3.1-1.2-4.5L73.4 26.55z" fill="#FFBA00"/>
+                      </svg>
+                      Google Drive-da ochish
                     </a>
                   </div>
                 )}

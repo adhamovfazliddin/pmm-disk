@@ -127,6 +127,10 @@ export const uz = {
   tabPlatformMaterials: "Platforma Materiallari",
   tabUsefulResources: "Foydali Resurslar",
   filterFavorites: "Tanlanganlar",
+  statMaterial: "Material",
+  statViews: "Ko'rish",
+  statDownloads: "Yuklama",
+  personalStats: "Shaxsiy Statistika",
 
   // Modal
   fullScreen: "To'liq ekran",
@@ -134,5 +138,17 @@ export const uz = {
   close: "Yopish",
   previewFallback: "Ushbu format uchun oldindan ko'rish mavjud emas. Iltimos, uni to'g'ridan-to'g'ri yuklab oling.",
 
-
+  // Contact / Murojaatlar
+  contact: "Murojaatlar",
+  contactTitle: "Bog'lanish",
+  contactDesc: "Tizim ma'muri (Super Admin) bilan bog'lanish",
+  contactAdminDesc: "O'qituvchilar va kafedralar siz bilan bog'lanishi uchun ma'lumotlaringizni kiriting.",
+  saveContactInfo: "Saqlash",
+  contactSavedInfo: "Ma'lumotlar muvaffaqiyatli saqlandi",
+  telegramUsername: "Telegram Username",
+  telegramUsernamePlaceholder: "@username yoki username",
+  phoneNumber: "Telefon raqam",
+  phoneNumberPlaceholder: "+998 90 123 45 67",
+  writeTelegram: "Telegram orqali yozish",
+  callPhone: "Qo'ng'iroq qilish",
 };

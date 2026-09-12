@@ -35,7 +35,9 @@ model User {
   teachers      User[]    @relation("TeacherDepartment")
   description   String?
   driveFolderId String?
-  phone         String?
+  phone            String?
+  telegram         String?
+  supportContacts  Json      @default("[]")
   lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -43,6 +45,7 @@ model User {
   materialsCreated Material[]
   assignedMaterials MaterialAssignment[]
   activities       MaterialActivity[]
+  driveActivities  DriveActivity[]
 
   departmentResources Resource[] @relation("ResourceDepartments")
   teacherResources    Resource[] @relation("ResourceTeachers")
@@ -131,4 +134,14 @@ model LibraryBook {
   annotation      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model DriveActivity {
+  id          String     @id @default(cuid())
+  driveFileId String
+  actionType  ActionType
+  userId      String?
+  createdAt   DateTime   @default(now())
+
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

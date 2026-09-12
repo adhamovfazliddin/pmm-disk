@@ -12,8 +12,8 @@ export default function MobileBottomNav({ role }: { role: string }) {
   const superAdminLinks = [
     { href: "/admin", icon: LayoutDashboard, label: t("dashboard") },
     { href: "/admin/teachers", icon: Users, label: t("teachers") },
-    { href: "/admin/materials", icon: FileText, label: t("materials") },
     { href: "/admin/departments", icon: Building, label: "Kafedralar" },
+    { href: "/admin/materials", icon: FileText, label: t("materials") },
     { href: "/admin/settings", icon: Settings, label: t("settings") },
   ];
 

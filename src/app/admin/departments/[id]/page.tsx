@@ -14,7 +14,7 @@ export default async function DepartmentDetailPage({ params }: { params: Promise
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
   thirtyDaysAgo.setHours(0, 0, 0, 0);
 
-  const [department, activityTimeline, recentAssignments, teachersList, distinctAssignments] = await Promise.all([
+  const [department, recentAssignments, teachersList, distinctAssignments] = await Promise.all([
     // Kafedra ma'lumotlari
     prisma.user.findUnique({
       where: { id: departmentId, role: "DEPARTMENT" },
@@ -34,18 +34,6 @@ export default async function DepartmentDetailPage({ params }: { params: Promise
       }
     }),
     
-    // 30 kunlik faoliyat (Kafedraning o'zi yoki unga tegishli o'qituvchilar ko'rgan/yuklagan)
-    prisma.materialActivity.findMany({
-      where: {
-        OR: [
-          { teacherId: departmentId },
-          { teacher: { departmentId: departmentId } }
-        ],
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      select: { actionType: true, createdAt: true },
-    }),
-
     // Materiallar (Eng so'nggi 20 ta biriktirilgan)
     prisma.materialAssignment.findMany({
       where: {
@@ -100,6 +88,57 @@ export default async function DepartmentDetailPage({ params }: { params: Promise
     notFound();
   }
 
+  // O'qituvchilarning ID-larini olish
+  const teacherIds = teachersList.map(t => t.id);
+
+  // Dashboard bilan bir xil mantiq: GLOBAL + kafedraga biriktirilgan materiallar
+  const allMaterials = await prisma.material.findMany({
+    where: {
+      OR: [
+        { visibility: "GLOBAL" },
+        { assignments: { some: { teacherId: departmentId } } },
+        ...(teacherIds.length > 0 ? [{ assignments: { some: { teacherId: { in: teacherIds } } } }] : [])
+      ]
+    },
+    select: {
+      id: true,
+      title: true,
+      subject: true,
+      format: true,
+      visibility: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+
+  const materialIds = allMaterials.map(m => m.id);
+
+  let totalViews = 0;
+  let totalDownloads = 0;
+  let timelineActivities: { actionType: "VIEW" | "DOWNLOAD", createdAt: Date }[] = [];
+
+  if (materialIds.length > 0) {
+    const activityStats = await prisma.materialActivity.groupBy({
+      by: ['actionType'],
+      where: { materialId: { in: materialIds } },
+      _count: { _all: true }
+    });
+
+    activityStats.forEach(stat => {
+      if (stat.actionType === 'VIEW') totalViews = stat._count._all;
+      if (stat.actionType === 'DOWNLOAD') totalDownloads = stat._count._all;
+    });
+
+    timelineActivities = await prisma.materialActivity.findMany({
+      where: {
+        materialId: { in: materialIds },
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      select: { actionType: true, createdAt: true },
+    });
+  }
+
   // Generate 30 days map
   const timelineMap = new Map<string, { date: string; view: number; download: number }>();
   for (let i = 29; i >= 0; i--) {
@@ -110,39 +149,25 @@ export default async function DepartmentDetailPage({ params }: { params: Promise
     timelineMap.set(dateStr, { date: shortDate, view: 0, download: 0 });
   }
 
-  let totalViews = 0;
-  let totalDownloads = 0;
-
-  activityTimeline.forEach(act => {
+  timelineActivities.forEach(act => {
     const dateStr = act.createdAt.toISOString().split('T')[0];
     if (timelineMap.has(dateStr)) {
       const item = timelineMap.get(dateStr)!;
       if (act.actionType === "VIEW") {
         item.view++;
-        totalViews++;
       } else if (act.actionType === "DOWNLOAD") {
         item.download++;
-        totalDownloads++;
       }
     }
   });
 
   const chartData = Array.from(timelineMap.values());
-  
-  // Unique materials filter
-  const uniqueMaterialsMap = new Map<string, any>();
-  recentAssignments.forEach(m => {
-    if (!uniqueMaterialsMap.has(m.material.id)) {
-      uniqueMaterialsMap.set(m.material.id, m.material);
-    }
-  });
-  
-  const formattedMaterials = Array.from(uniqueMaterialsMap.values()).slice(0, 20);
+  const formattedMaterials = allMaterials;
 
   const departmentData = {
     ...department,
     stats: {
-      materials: distinctAssignments.length,
+      materials: allMaterials.length,
       views: totalViews,
       downloads: totalDownloads,
       teachersCount: department._count.teachers

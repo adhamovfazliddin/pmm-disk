@@ -129,6 +129,10 @@ export const ru = {
   tabPlatformMaterials: "Материалы платформы",
   tabUsefulResources: "Полезные ресурсы",
   filterFavorites: "Избранное",
+  statMaterial: "Материал",
+  statViews: "Просмотры",
+  statDownloads: "Скачивания",
+  personalStats: "Личная Статистика",
 
   // Modal
   fullScreen: "Полный экран",
@@ -136,5 +140,17 @@ export const ru = {
   close: "Закрыть",
   previewFallback: "Предварительный просмотр недоступен для этого формата. Загрузите его напрямую.",
 
-
+  // Contact / Обращения
+  contact: "Обращения",
+  contactTitle: "Связаться",
+  contactDesc: "Связаться с системным администратором (Super Admin)",
+  contactAdminDesc: "Введите свои данные, чтобы учителя и кафедры могли связаться с вами.",
+  saveContactInfo: "Сохранить",
+  contactSavedInfo: "Данные успешно сохранены",
+  telegramUsername: "Telegram Имя пользователя",
+  telegramUsernamePlaceholder: "@username или username",
+  phoneNumber: "Номер телефона",
+  phoneNumberPlaceholder: "+998 90 123 45 67",
+  writeTelegram: "Написать в Telegram",
+  callPhone: "Позвонить",
 };

@@ -22,6 +22,50 @@ export async function recordMaterialActivity(materialId: string, actionType: 'VI
   }
 }
 
+export async function recordDriveActivity(driveFileId: string, actionType: 'VIEW' | 'DOWNLOAD') {
+  try {
+    const session = await getSession() as { userId: string } | null;
+    const userId = session?.userId;
+
+    await db.driveActivity.create({
+      data: {
+        driveFileId,
+        actionType,
+        userId,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to record ${actionType} drive activity for ${driveFileId}:`, error);
+    return { success: false };
+  }
+}
+
+export async function getDriveStats(driveFileIds: string[]) {
+  if (!driveFileIds || driveFileIds.length === 0) return { views: 0, downloads: 0 };
+  
+  try {
+    const stats = await db.driveActivity.groupBy({
+      by: ['actionType'],
+      where: { driveFileId: { in: driveFileIds } },
+      _count: { _all: true }
+    });
+
+    let views = 0;
+    let downloads = 0;
+
+    stats.forEach(stat => {
+      if (stat.actionType === 'VIEW') views = stat._count._all;
+      if (stat.actionType === 'DOWNLOAD') downloads = stat._count._all;
+    });
+
+    return { views, downloads };
+  } catch (error) {
+    console.error("Failed to fetch drive stats:", error);
+    return { views: 0, downloads: 0 };
+  }
+}
+
 export async function getAdminAnalytics() {
   const session = await getSession();
   if (!session || session.role !== "SUPERADMIN") return null;

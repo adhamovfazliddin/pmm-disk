@@ -90,6 +90,35 @@ export default async function DashboardPage() {
 
   const initialBookmarks = dbBookmarks.map(b => b.itemId);
 
+  // Shaxsiy statistika hisoblash (O'ziga tegishli yoki yaratgan materiallar uchun)
+  const personalMaterialsIds = materials
+    .filter(m => m.visibility === "RESTRICTED" || m.assignments.length > 0)
+    .map(m => m.id);
+
+  let totalViews = 0;
+  let totalDownloads = 0;
+
+  if (personalMaterialsIds.length > 0) {
+    const activityStats = await prisma.materialActivity.groupBy({
+      by: ['actionType'],
+      where: {
+        materialId: { in: personalMaterialsIds }
+      },
+      _count: { _all: true }
+    });
+
+    activityStats.forEach(stat => {
+      if (stat.actionType === 'VIEW') totalViews = stat._count._all;
+      if (stat.actionType === 'DOWNLOAD') totalDownloads = stat._count._all;
+    });
+  }
+
+  const personalStats = {
+    materials: personalMaterialsIds.length,
+    views: totalViews,
+    downloads: totalDownloads
+  };
+
   return (
     <DashboardClient 
       initialMaterials={materials} 
@@ -99,6 +128,7 @@ export default async function DashboardPage() {
       driveFolderId={user.driveFolderId || user.department?.driveFolderId} 
       initialGlobalResources={globalResources}
       initialBookmarks={initialBookmarks}
+      personalStats={personalStats}
     />
   );
 }

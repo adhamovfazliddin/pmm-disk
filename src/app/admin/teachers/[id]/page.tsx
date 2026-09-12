@@ -19,57 +19,88 @@ export default async function TeacherDetailPage({ params }: { params: Promise<{ 
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
   thirtyDaysAgo.setHours(0, 0, 0, 0);
 
-  const [teacher, activityTimeline] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: teacherId, role: "TEACHER" },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        isActive: true,
-        description: true,
-        driveFolderId: true,
-        createdAt: true,
-        lastLoginAt: true,
-        department: { select: { id: true, name: true } },
-        assignedMaterials: {
-          select: {
-            material: {
-              select: {
-                id: true,
-                title: true,
-                subject: true,
-                format: true,
-                visibility: true,
-                createdAt: true,
-              }
+  const teacher = await prisma.user.findUnique({
+    where: { id: teacherId, role: "TEACHER" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      isActive: true,
+      description: true,
+      driveFolderId: true,
+      createdAt: true,
+      lastLoginAt: true,
+      department: { select: { id: true, name: true } },
+      assignedMaterials: {
+        select: {
+          material: {
+            select: {
+              id: true,
+              title: true,
+              subject: true,
+              format: true,
+              visibility: true,
+              createdAt: true,
             }
-          },
-          orderBy: { material: { createdAt: "desc" } },
-          take: 20,
+          }
         },
-        activities: {
-          select: { actionType: true, createdAt: true },
-          orderBy: { createdAt: "desc" },
-        },
-      },
-    }),
-    // 30 kunlik faoliyat timeline
-    prisma.materialActivity.findMany({
-      where: {
-        teacherId: teacherId,
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      select: { actionType: true, createdAt: true },
-    }),
-  ]);
+        orderBy: { material: { createdAt: "desc" } },
+        take: 20,
+      }
+    },
+  });
 
   if (!teacher) notFound();
 
-  // Umumiy statistika
-  const totalViews = teacher.activities.filter(a => a.actionType === "VIEW").length;
-  const totalDownloads = teacher.activities.filter(a => a.actionType === "DOWNLOAD").length;
+  // Dashboard bilan bir xil mantiq: GLOBAL + biriktirilgan materiallar
+  const allMaterials = await prisma.material.findMany({
+    where: {
+      OR: [
+        { visibility: "GLOBAL" },
+        { assignments: { some: { teacherId: teacherId } } },
+        ...(teacher.department?.id ? [{ assignments: { some: { teacherId: teacher.department.id } } }] : [])
+      ]
+    },
+    select: {
+      id: true,
+      title: true,
+      subject: true,
+      format: true,
+      visibility: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+
+  const materials = allMaterials;
+  const materialIds = materials.map(m => m.id);
+
+  let totalViews = 0;
+  let totalDownloads = 0;
+  let activityTimeline: { actionType: "VIEW" | "DOWNLOAD", createdAt: Date }[] = [];
+
+  if (materialIds.length > 0) {
+    const activityStats = await prisma.materialActivity.groupBy({
+      by: ['actionType'],
+      where: { materialId: { in: materialIds } },
+      _count: { _all: true }
+    });
+
+    activityStats.forEach(stat => {
+      if (stat.actionType === 'VIEW') totalViews = stat._count._all;
+      if (stat.actionType === 'DOWNLOAD') totalDownloads = stat._count._all;
+    });
+
+    activityTimeline = await prisma.materialActivity.findMany({
+      where: {
+        materialId: { in: materialIds },
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      select: { actionType: true, createdAt: true },
+    });
+  }
 
   // 30 kunlik timeline hisoblash
   const timelineMap = new Map<string, { name: string; views: number; downloads: number }>();
@@ -90,7 +121,7 @@ export default async function TeacherDetailPage({ params }: { params: Promise<{ 
 
   const timeline = Array.from(timelineMap.values()).reverse();
 
-  const materials = teacher.assignedMaterials.map(a => a.material);
+
 
   return (
     <TeacherDetailClient

@@ -19,10 +19,11 @@ export default function AppLayout({ children, role, email, name, department }: {
   const adminLinks = [
     { href: "/admin", icon: LayoutDashboard, label: t('dashboard') },
     { href: "/admin/teachers", icon: Users, label: t('teachers') },
-    { href: "/admin/materials", icon: FileText, label: t('materials') },
     { href: "/admin/departments", icon: Building, label: t('departments') },
+    { href: "/admin/materials", icon: FileText, label: t('materials') },
     { href: "/admin/resources", icon: BookOpen, label: t('resources') },
     { href: "/admin/library", icon: Library, label: t('library') },
+    { href: "/admin/contact", icon: Users, label: t('contact') },
     { href: "/admin/settings", icon: Settings, label: t('settings') },
   ];
 
@@ -68,6 +69,20 @@ export default function AppLayout({ children, role, email, name, department }: {
             >
               <LayoutDashboard className={`w-5 h-5 ${pathname === '/dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
               {t('catalog')}
+            </Link>
+          )}
+
+          {(role === "TEACHER" || role === "DEPARTMENT") && (
+            <Link 
+              href="/dashboard/contact" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                pathname === '/dashboard/contact'
+                  ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <Users className={`w-5 h-5 ${pathname === '/dashboard/contact' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+              {t('contactTitle')}
             </Link>
           )}
         </nav>
