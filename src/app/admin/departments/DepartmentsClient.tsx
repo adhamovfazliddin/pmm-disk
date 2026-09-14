@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Pagination from "@/components/ui/Pagination";
 
 type TeacherMini = {
   id: string;
@@ -81,7 +82,7 @@ export default function DepartmentsClient({ initialDepartments }: { initialDepar
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '?';
 
-  const filteredDepartments = useMemo(() => initialDepartments.filter(dep => {
+  const filteredDepartmentsFull = useMemo(() => initialDepartments.filter(dep => {
     const matchesSearch =
       dep.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dep.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -91,6 +92,19 @@ export default function DepartmentsClient({ initialDepartments }: { initialDepar
       (statusFilter === 'inactive' && !dep.isActive);
     return matchesSearch && matchesStatus;
   }), [initialDepartments, searchQuery, statusFilter]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredDepartmentsFull.length / itemsPerPage);
+  
+  const filteredDepartments = useMemo(() => {
+    return filteredDepartmentsFull.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredDepartmentsFull, currentPage]);
+
+  React.useEffect(() => { setCurrentPage(1); }, [searchQuery, statusFilter]);
 
   const extractDriveId = (input: string) => {
     if (!input) return "";
@@ -192,7 +206,7 @@ export default function DepartmentsClient({ initialDepartments }: { initialDepar
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => exportToCSV(filteredDepartments)}
+            onClick={() => exportToCSV(filteredDepartmentsFull)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium"
           >
             <Download className="w-4 h-4" /> CSV eksport
@@ -387,6 +401,14 @@ export default function DepartmentsClient({ initialDepartments }: { initialDepar
           </table>
         </div>
       </div>
+      
+      {filteredDepartmentsFull.length > itemsPerPage && (
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       {/* Add/Edit Modal */}
       {isModalOpen && (

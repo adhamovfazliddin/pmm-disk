@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2, Building } from "lucide-react";
-import { extractDriveFolderId } from "@/lib/drive";
+import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2, Building, GraduationCap, Users } from "lucide-react";
+import { extractDriveFolderId, getDriveDownloadUrl } from "@/lib/drive";
 
 import { useLanguage } from "@/lib/i18n";
 import { recordMaterialActivity, recordDriveActivity, getDriveStats } from "@/app/actions/analytics";
 import { fetchDriveFiles, DriveFile } from "@/app/actions/drive";
 import MaterialPreviewModal from "@/components/MaterialPreviewModal";
+import Pagination from "@/components/ui/Pagination";
+import { GridSkeleton } from "@/components/ui/Skeletons";
 import { toast } from "sonner";
 import { toggleBookmark as toggleBookmarkAction } from "@/app/actions/bookmark";
 
@@ -238,13 +240,33 @@ export default function DashboardClient({
     };
   });
 
-  const displayMaterials = activeTab === "platform" 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [resourcesPage, setResourcesPage] = useState(1);
+  const itemsPerPage = 12;
+
+  const displayMaterialsFull = activeTab === "platform" 
     ? filteredMaterials 
     : mappedDriveFiles.filter((material) => {
         const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFormat = formatFilter === "ALL" || material.format === formatFilter;
         return matchesSearch && matchesFormat;
       });
+
+  const totalPages = Math.ceil(displayMaterialsFull.length / itemsPerPage);
+  const displayMaterials = displayMaterialsFull.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalResourcesPages = Math.ceil(filteredLocalResources.length / itemsPerPage);
+  const displayResources = filteredLocalResources.slice(
+    (resourcesPage - 1) * itemsPerPage,
+    resourcesPage * itemsPerPage
+  );
+
+  // Reset pagination when search or filters change
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, formatFilter, activeTab, showBookmarksOnly]);
+  useEffect(() => { setResourcesPage(1); }, [resourceSearch, resourceFilter]);
 
   return (
     <div className="space-y-6">
@@ -255,7 +277,7 @@ export default function DashboardClient({
         <div className="flex-1 flex flex-col w-full">
            <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-100/50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl">
-                 <Building className="w-8 h-8" />
+                 {role === "TEACHER" ? <GraduationCap className="w-8 h-8" /> : <Building className="w-8 h-8" />}
               </div>
               <div>
                  <h1 className="text-xl md:text-2xl font-bold text-blue-950 dark:text-white transition-colors">
@@ -626,9 +648,8 @@ export default function DashboardClient({
 
       {/* Materials */}
       {isLoadingDrive ? (
-        <div className="py-20 flex flex-col items-center justify-center text-center bg-white/90 dark:bg-[#111827]/90 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Fayllar yuklanmoqda...</h3>
+        <div className="pt-4">
+          <GridSkeleton count={6} />
         </div>
       ) : driveError ? (
         <div className="py-20 flex flex-col items-center justify-center text-center bg-red-50 dark:bg-red-900/10 backdrop-blur-md rounded-2xl border border-red-200 dark:border-red-800/30">
@@ -734,7 +755,7 @@ export default function DashboardClient({
                       <ExternalLink className="w-4 h-4" /> {t('preview')}
                     </button>
                     <a
-                      href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
+                      href={getDriveDownloadUrl(material.driveFileId, material.format)}
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => {
@@ -857,7 +878,7 @@ export default function DashboardClient({
                           <Eye className="w-4 h-4" />
                         </button>
                         <a
-                          href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
+                          href={getDriveDownloadUrl(material.driveFileId, material.format)}
                           target="_blank"
                           rel="noreferrer"
                           onClick={() => {
@@ -881,6 +902,15 @@ export default function DashboardClient({
             </table>
           </div>
         </div>
+      )}
+      
+      {/* Sahifalash tugmalari (Pagination) */}
+      {!isLoadingDrive && !driveError && displayMaterialsFull.length > itemsPerPage && (
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
       
         </>

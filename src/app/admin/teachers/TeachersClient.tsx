@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createTeacher, updateTeacher, toggleTeacherStatus, deleteTeacher, bulkToggleTeacherStatus, bulkDeleteTeachers } from "@/app/actions/user";
 import {
   Plus, Edit, ShieldBan, ShieldCheck, Trash2, Search, FilterX,
@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n";
+import Pagination from "@/components/ui/Pagination";
 
 type TeacherStats = { materials: number; views: number; downloads: number };
 
@@ -85,7 +86,7 @@ export default function TeachersClient({ initialTeachers, departments }: { initi
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '?';
 
-  const filteredTeachers = useMemo(() => initialTeachers.filter(teacher => {
+  const filteredTeachersFull = useMemo(() => initialTeachers.filter(teacher => {
     const matchesSearch =
       teacher.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       teacher.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -97,6 +98,19 @@ export default function TeachersClient({ initialTeachers, departments }: { initi
       (statusFilter === 'inactive' && !teacher.isActive);
     return matchesSearch && matchesStatus;
   }), [initialTeachers, searchQuery, statusFilter]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredTeachersFull.length / itemsPerPage);
+  
+  const filteredTeachers = useMemo(() => {
+    return filteredTeachersFull.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredTeachersFull, currentPage]);
+
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, statusFilter]);
 
   const extractDriveId = (input: string) => {
     if (!input) return "";
@@ -197,7 +211,7 @@ export default function TeachersClient({ initialTeachers, departments }: { initi
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => exportToCSV(filteredTeachers)}
+            onClick={() => exportToCSV(filteredTeachersFull)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium"
           >
             <Download className="w-4 h-4" /> CSV eksport
@@ -422,6 +436,14 @@ export default function TeachersClient({ initialTeachers, departments }: { initi
           </table>
         </div>
       </div>
+      
+      {filteredTeachersFull.length > itemsPerPage && (
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       {/* Add/Edit Modal */}
       {isModalOpen && (

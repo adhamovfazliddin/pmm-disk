@@ -19,6 +19,7 @@ export default function MobileBottomNav({ role }: { role: string }) {
 
   const teacherLinks = [
     { href: "/dashboard", icon: Grid, label: t("catalog") },
+    { href: "/dashboard/contact", icon: Users, label: t("contactTitle") },
   ];
 
   const links = role === "SUPERADMIN" ? superAdminLinks : (role === "TEACHER" || role === "DEPARTMENT" ? teacherLinks : []);

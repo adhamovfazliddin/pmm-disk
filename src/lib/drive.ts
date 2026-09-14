@@ -18,7 +18,12 @@ export function getDrivePreviewUrl(fileId: string): string {
   return `https://drive.google.com/file/d/${fileId}/preview`;
 }
 
-export function getDriveDownloadUrl(fileId: string): string {
+export function getDriveDownloadUrl(fileId: string, format?: string): string {
+  if (format === "Document") {
+    return `https://docs.google.com/document/d/${fileId}/export?format=docx`;
+  } else if (format === "Presentation") {
+    return `https://docs.google.com/presentation/d/${fileId}/export/pptx`;
+  }
   return `https://drive.google.com/uc?export=download&id=${fileId}`;
 }
 

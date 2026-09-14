@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createMaterial, deleteMaterial, updateMaterial } from "@/app/actions/material";
 import { Plus, Trash2, ExternalLink, Download, Edit2, Search, Filter, LayoutGrid, List, FileText, Video, Presentation, FileArchive, File, BookOpen, Eye, Lock, FolderPlus, Globe, CheckSquare, XSquare, X, Check, Loader2, Info, Link2, UserCheck, Building2, User } from "lucide-react";
 import { toast } from "sonner";
+import Pagination from "@/components/ui/Pagination";
 
 const FORMAT_ICONS = {
   PDF: <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 border border-red-200/60 dark:border-red-500/20"><FileText className="w-4 h-4" /><span className="text-xs font-semibold">PDF</span></div>,
@@ -13,7 +14,7 @@ const FORMAT_ICONS = {
   Document: <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200/60 dark:border-blue-500/20"><File className="w-4 h-4" /><span className="text-xs font-semibold">DOCX</span></div>,
 };
 import { useRouter } from "next/navigation";
-import { getDrivePreviewUrl } from "@/lib/drive";
+import { getDrivePreviewUrl, getDriveDownloadUrl } from "@/lib/drive";
 import { useLanguage } from "@/lib/i18n";
 
 interface Material {
@@ -73,13 +74,23 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
     localStorage.setItem('materials_view_mode_admin', mode);
   };
 
-  const filteredMaterials = initialMaterials.filter((material) => {
+  const filteredMaterialsFull = initialMaterials.filter((material) => {
     const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           material.subject.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (material.description || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFormat = formatFilter === "ALL" || material.format === formatFilter;
     return matchesSearch && matchesFormat;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(filteredMaterialsFull.length / itemsPerPage);
+  const filteredMaterials = filteredMaterialsFull.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, formatFilter]);
 
   const openAddModal = () => {
     setIsEditMode(false);
@@ -264,7 +275,7 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
                       <ExternalLink className="w-4 h-4" />
                     </a>
                     <a 
-                      href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
+                      href={getDriveDownloadUrl(material.driveFileId, material.format)}
                       target="_blank"
                       rel="noreferrer"
                       className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
@@ -366,7 +377,7 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
                         <ExternalLink className="w-4 h-4" />
                       </a>
                       <a 
-                        href={`https://drive.google.com/uc?export=download&id=${material.driveFileId}`}
+                        href={getDriveDownloadUrl(material.driveFileId, material.format)}
                         target="_blank"
                         rel="noreferrer"
                         className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
@@ -396,6 +407,14 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
           </table>
         </div>
       </div>
+      )}
+      
+      {filteredMaterialsFull.length > itemsPerPage && (
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
 
       {isModalOpen && (
