@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FileText, Settings, Grid, Building } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Settings, Grid, Building, Library, PlusSquare } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
 export default function MobileBottomNav({ role }: { role: string }) {
@@ -14,11 +14,14 @@ export default function MobileBottomNav({ role }: { role: string }) {
     { href: "/admin/teachers", icon: Users, label: t("teachers") },
     { href: "/admin/departments", icon: Building, label: "Kafedralar" },
     { href: "/admin/materials", icon: FileText, label: t("materials") },
+    { href: "/admin/materials/pending", icon: FileText, label: "Kutilayotganlar" },
     { href: "/admin/settings", icon: Settings, label: t("settings") },
   ];
 
   const teacherLinks = [
     { href: "/dashboard", icon: Grid, label: t("catalog") },
+    { href: "/dashboard/materials/new", icon: PlusSquare, label: "Qo'shish" },
+    { href: "/dashboard/my-materials", icon: Library, label: "Mening" },
     { href: "/dashboard/contact", icon: Users, label: t("contactTitle") },
   ];
 

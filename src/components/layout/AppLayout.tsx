@@ -21,6 +21,7 @@ export default function AppLayout({ children, role, email, name, department }: {
     { href: "/admin/teachers", icon: Users, label: t('teachers') },
     { href: "/admin/departments", icon: Building, label: t('departments') },
     { href: "/admin/materials", icon: FileText, label: t('materials') },
+    { href: "/admin/materials/pending", icon: FileText, label: "Kutilayotganlar" },
     { href: "/admin/resources", icon: BookOpen, label: t('resources') },
     { href: "/admin/library", icon: Library, label: t('library') },
     { href: "/admin/contact", icon: Users, label: t('contact') },
@@ -59,17 +60,41 @@ export default function AppLayout({ children, role, email, name, department }: {
             )
           })}
           {(role === "TEACHER" || role === "DEPARTMENT") && (
-            <Link 
-              href="/dashboard" 
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                pathname === '/dashboard'
-                  ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
-              }`}
-            >
-              <LayoutDashboard className={`w-5 h-5 ${pathname === '/dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
-              {t('catalog')}
-            </Link>
+            <>
+              <Link 
+                href="/dashboard" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  pathname === '/dashboard'
+                    ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <LayoutDashboard className={`w-5 h-5 ${pathname === '/dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                {t('catalog')}
+              </Link>
+              <Link 
+                href="/dashboard/materials/new" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  pathname === '/dashboard/materials/new'
+                    ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <FileText className={`w-5 h-5 ${pathname === '/dashboard/materials/new' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                Material qo'shish
+              </Link>
+              <Link 
+                href="/dashboard/my-materials" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  pathname === '/dashboard/my-materials'
+                    ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <Library className={`w-5 h-5 ${pathname === '/dashboard/my-materials' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                Mening materiallarim
+              </Link>
+            </>
           )}
 
           {(role === "TEACHER" || role === "DEPARTMENT") && (

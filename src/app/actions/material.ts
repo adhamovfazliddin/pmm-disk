@@ -9,16 +9,16 @@ import { getSession } from "@/lib/session";
 const materialSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  subject: z.string().min(1),
+  subject: z.string().optional(), // Make subject optional since it's removed from form
   format: z.string().min(1),
   driveUrl: z.string().min(1),
-  visibility: z.enum(["GLOBAL", "RESTRICTED"]),
+  visibility: z.enum(["GLOBAL", "RESTRICTED"]).optional(),
   assignedTeacherIds: z.array(z.string()).optional(),
 });
 
 export async function createMaterial(data: unknown) {
   const session = await getSession();
-  if (!session || session.role !== "SUPERADMIN") {
+  if (!session) {
     return { error: "Unauthorized" };
   }
 
@@ -32,25 +32,35 @@ export async function createMaterial(data: unknown) {
     return { error: "Could not parse Google Drive URL." };
   }
 
+  const isSuperAdmin = session.role === "SUPERADMIN";
+  const initialStatus = isSuperAdmin ? "APPROVED" : "PENDING";
+  const uploadedById = isSuperAdmin ? undefined : (session.userId as string);
+  const visibility = isSuperAdmin ? (parsed.data.visibility || "GLOBAL") : "RESTRICTED";
+  const subject = parsed.data.subject || "Umumiy";
+
   try {
     await prisma.material.create({
       data: {
         title: parsed.data.title,
         description: parsed.data.description,
-        subject: parsed.data.subject,
+        subject,
         format: parsed.data.format,
-        visibility: parsed.data.visibility,
+        visibility,
+        status: initialStatus,
         driveFileId,
         createdById: session.userId as string,
-        assignments: parsed.data.visibility === "RESTRICTED" && parsed.data.assignedTeacherIds
-          ? {
-              create: parsed.data.assignedTeacherIds.map(teacherId => ({ teacherId }))
-            }
-          : undefined,
+        uploadedById,
+        assignments: isSuperAdmin
+          ? (visibility === "RESTRICTED" && parsed.data.assignedTeacherIds
+              ? { create: parsed.data.assignedTeacherIds.map(teacherId => ({ teacherId })) }
+              : undefined)
+          : { create: [{ teacherId: session.userId as string }] },
       }
     });
     revalidatePath("/admin/materials");
+    revalidatePath("/admin/materials/pending");
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/my-materials");
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -58,18 +68,81 @@ export async function createMaterial(data: unknown) {
   }
 }
 
-export async function deleteMaterial(id: string) {
+export async function approveMaterial(id: string) {
   const session = await getSession();
   if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
 
   try {
+    await prisma.material.update({
+      where: { id },
+      data: {
+        status: "APPROVED",
+        reviewedById: session.userId as string,
+        reviewedAt: new Date(),
+        rejectionReason: null,
+      }
+    });
+    revalidatePath("/admin/materials");
+    revalidatePath("/admin/materials/pending");
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/my-materials");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Materialni tasdiqlashda xatolik yuz berdi." };
+  }
+}
+
+export async function rejectMaterial(id: string, reason: string) {
+  const session = await getSession();
+  if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+
+  if (!reason || reason.trim() === "") {
+    return { error: "Rad etish sababini kiritish majburiy." };
+  }
+
+  try {
+    await prisma.material.update({
+      where: { id },
+      data: {
+        status: "REJECTED",
+        rejectionReason: reason,
+        reviewedById: session.userId as string,
+        reviewedAt: new Date(),
+      }
+    });
+    revalidatePath("/admin/materials");
+    revalidatePath("/admin/materials/pending");
+    revalidatePath("/dashboard/my-materials");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Materialni rad etishda xatolik yuz berdi." };
+  }
+}
+
+export async function deleteMaterial(id: string) {
+  const session = await getSession();
+  if (!session) return { error: "Unauthorized" };
+
+  try {
+    const material = await prisma.material.findUnique({ where: { id } });
+    if (!material) return { error: "Material topilmadi" };
+
+    // Check permissions
+    if (session.role !== "SUPERADMIN" && material.uploadedById !== session.userId) {
+      return { error: "Siz faqat o'zingiz yuklagan materialni o'chira olasiz." };
+    }
+
     // Delete dependent records first to avoid foreign key constraint errors
     await prisma.materialActivity.deleteMany({ where: { materialId: id } });
     await prisma.materialAssignment.deleteMany({ where: { materialId: id } });
     await prisma.material.delete({ where: { id } });
     
     revalidatePath("/admin/materials");
+    revalidatePath("/admin/materials/pending");
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/my-materials");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete material:", error);

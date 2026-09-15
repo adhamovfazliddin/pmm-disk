@@ -29,6 +29,7 @@ export default async function DashboardPage() {
   const [materials, dbResources, dbBookmarks] = await Promise.all([
     prisma.material.findMany({
       where: {
+        status: "APPROVED",
         OR: [
           { visibility: "GLOBAL" },
           { assignments: { some: { teacherId: session.userId } } },
