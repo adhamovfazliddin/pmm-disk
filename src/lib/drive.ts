@@ -9,8 +9,9 @@ export function extractDriveId(url: string): string | null {
   // Matches:
   // - https://drive.google.com/file/d/<FILE_ID>/view
   // - https://drive.google.com/open?id=<FILE_ID>
-  // - https://drive.google.com/uc?id=<FILE_ID>
-  const match = url.match(/(?:file\/d\/|id=|folders\/|open\?id=)([-\w]+)/);
+  // - https://docs.google.com/presentation/d/<FILE_ID>/edit
+  // - https://docs.google.com/document/d/<FILE_ID>/edit
+  const match = url.match(/(?:file\/d\/|document\/d\/|presentation\/d\/|id=|folders\/|open\?id=)([-\w]+)/);
   return match ? match[1] : null;
 }
 

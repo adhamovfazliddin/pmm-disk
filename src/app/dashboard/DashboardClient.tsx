@@ -647,11 +647,11 @@ export default function DashboardClient({
       </div>
 
       {/* Materials */}
-      {isLoadingDrive ? (
+      {(activeTab === "drive" && isLoadingDrive) ? (
         <div className="pt-4">
           <GridSkeleton count={6} />
         </div>
-      ) : driveError ? (
+      ) : (activeTab === "drive" && driveError) ? (
         <div className="py-20 flex flex-col items-center justify-center text-center bg-red-50 dark:bg-red-900/10 backdrop-blur-md rounded-2xl border border-red-200 dark:border-red-800/30">
           <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-1">{driveError}</h3>
         </div>
@@ -673,6 +673,23 @@ export default function DashboardClient({
               <div className="w-full h-40 bg-slate-100 dark:bg-[#1E293B]/60 relative border-b border-slate-200/80 dark:border-slate-800/80 overflow-hidden">
                 {material.thumbnailLink ? (
                   <img src={material.thumbnailLink} alt={material.title} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
+                ) : material.driveFileId ? (
+                  <>
+                    <img 
+                      src={`https://drive.google.com/thumbnail?id=${material.driveFileId}&sz=w800`} 
+                      alt={material.title} 
+                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" 
+                      referrerPolicy="no-referrer" 
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-full h-full flex-col items-center justify-center text-slate-400 opacity-60" style={{ display: 'none' }}>
+                      {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <File className="w-12 h-12" />}
+                    </div>
+                  </>
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
                     {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <File className="w-12 h-12" />}
@@ -797,6 +814,23 @@ export default function DashboardClient({
                           {material.thumbnailLink ? (
                             <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
                               <img src={material.thumbnailLink} alt={material.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                          ) : material.driveFileId ? (
+                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 relative">
+                              <img 
+                                src={`https://drive.google.com/thumbnail?id=${material.driveFileId}&sz=w200`} 
+                                alt={material.title} 
+                                className="w-full h-full object-cover" 
+                                referrerPolicy="no-referrer" 
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                  if (fallback) fallback.style.display = 'flex';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-slate-100 dark:bg-[#1E293B]/60 flex items-center justify-center" style={{ display: 'none' }}>
+                                {FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <File className="w-5 h-5 text-gray-500" />}
+                              </div>
                             </div>
                           ) : (
                             FORMAT_ICONS[material.format as keyof typeof FORMAT_ICONS] || <div className="p-2 bg-slate-100 dark:bg-[#1E293B]/60 rounded-lg shrink-0"><File className="w-5 h-5 text-gray-500" /></div>

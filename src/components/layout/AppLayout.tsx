@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import MobileBottomNav from "./MobileBottomNav";
 
-export default function AppLayout({ children, role, email, name, department }: { children: ReactNode, role: string, email?: string, name?: string, department?: string }) {
+export default function AppLayout({ children, role, email, name, department, pendingCount = 0 }: { children: ReactNode, role: string, email?: string, name?: string, department?: string, pendingCount?: number }) {
   const { t, language, setLanguage } = useLanguage();
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -21,7 +21,7 @@ export default function AppLayout({ children, role, email, name, department }: {
     { href: "/admin/teachers", icon: Users, label: t('teachers') },
     { href: "/admin/departments", icon: Building, label: t('departments') },
     { href: "/admin/materials", icon: FileText, label: t('materials') },
-    { href: "/admin/materials/pending", icon: FileText, label: "Kutilayotganlar" },
+    { href: "/admin/materials/pending", icon: FileText, label: "Kutilayotganlar", badge: pendingCount },
     { href: "/admin/resources", icon: BookOpen, label: t('resources') },
     { href: "/admin/library", icon: Library, label: t('library') },
     { href: "/admin/contact", icon: Users, label: t('contact') },
@@ -48,14 +48,21 @@ export default function AppLayout({ children, role, email, name, department }: {
               <Link 
                 key={item.href}
                 href={item.href} 
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
                   isActive 
                     ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                {item.label}
+                <div className="flex items-center gap-3">
+                  <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                  {item.label}
+                </div>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             )
           })}
@@ -223,8 +230,7 @@ export default function AppLayout({ children, role, email, name, department }: {
           {children}
         </div>
         
-        {/* Mobile Bottom Navigation */}
-        <MobileBottomNav role={role} />
+        <MobileBottomNav role={role} pendingCount={pendingCount} />
       </main>
     </div>
   );

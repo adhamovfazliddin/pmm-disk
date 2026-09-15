@@ -331,9 +331,11 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
                   </td>
                 </tr>
               )}
-              {filteredMaterials.map((material, index) => (
+              {filteredMaterials.map((material, index) => {
+                const sequentialNumber = (currentPage - 1) * itemsPerPage + index + 1;
+                return (
                 <tr key={material.id} className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all group">
-                  <td className="p-4 text-center font-medium text-slate-500">{index + 1}</td>
+                  <td className="p-4 text-center font-medium text-slate-500">{sequentialNumber}</td>
                   <td className="p-4 font-medium text-slate-900 dark:text-slate-100 max-w-xs">
                     <div className="flex flex-col gap-0.5">
                       <span className="truncate font-semibold">{material.title}</span>
@@ -402,7 +404,8 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

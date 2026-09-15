@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, FileText, Settings, Grid, Building, Library, PlusSquare } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
-export default function MobileBottomNav({ role }: { role: string }) {
+export default function MobileBottomNav({ role, pendingCount = 0 }: { role: string, pendingCount?: number }) {
   const pathname = usePathname();
   const { t } = useLanguage();
 
@@ -14,7 +14,7 @@ export default function MobileBottomNav({ role }: { role: string }) {
     { href: "/admin/teachers", icon: Users, label: t("teachers") },
     { href: "/admin/departments", icon: Building, label: "Kafedralar" },
     { href: "/admin/materials", icon: FileText, label: t("materials") },
-    { href: "/admin/materials/pending", icon: FileText, label: "Kutilayotganlar" },
+    { href: "/admin/materials/pending", icon: FileText, label: "Kutilayotganlar", badge: pendingCount },
     { href: "/admin/settings", icon: Settings, label: t("settings") },
   ];
 
@@ -40,13 +40,20 @@ export default function MobileBottomNav({ role }: { role: string }) {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
+              className={`relative flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
                 isActive
                   ? "text-blue-600 dark:text-blue-400"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
               }`}
             >
-              <Icon className={`w-6 h-6 ${isActive ? "scale-110 transition-transform" : ""}`} />
+              <div className="relative">
+                <Icon className={`w-6 h-6 ${isActive ? "scale-110 transition-transform" : ""}`} />
+                {link.badge !== undefined && link.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm min-w-[16px] text-center">
+                    {link.badge}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] font-medium truncate max-w-[70px]">{link.label}</span>
             </Link>
           );

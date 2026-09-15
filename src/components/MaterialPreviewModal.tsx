@@ -80,6 +80,8 @@ export default function MaterialPreviewModal({ material, isOpen, onClose }: Mate
   
   if (material.format === "Document") {
     previewUrl = `https://docs.google.com/document/d/${material.driveFileId}/preview?rm=minimal`;
+  } else if (material.format === "Presentation") {
+    previewUrl = `https://docs.google.com/presentation/d/${material.driveFileId}/embed?start=false&loop=false&delayms=3000`;
   }
 
   const viewUrl = `https://drive.google.com/file/d/${material.driveFileId}/view`;
