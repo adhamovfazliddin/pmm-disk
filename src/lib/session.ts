@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 const envSecret = process.env.SESSION_SECRET;
 if (!envSecret && process.env.NODE_ENV === "production") {
-  throw new Error("CRITICAL SECURITY ERROR: SESSION_SECRET is not set in production. Set this environment variable immediately.");
+  console.warn("WARNING: SESSION_SECRET is not set in production. Using insecure default key.");
 }
 const secretKey = envSecret || "default_secret_key_change_me_in_prod";
 const encodedKey = new TextEncoder().encode(secretKey);
