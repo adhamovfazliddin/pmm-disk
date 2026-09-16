@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import MaterialPreviewModal from "@/components/MaterialPreviewModal";
+import { useLanguage } from "@/lib/i18n";
 
 const FORMAT_ICONS = {
   PDF: { icon: FileText, bg: "bg-red-50 dark:bg-red-500/10", color: "text-red-600 dark:text-red-400" },
@@ -24,68 +25,81 @@ const STATUS_CONFIG = {
   },
   APPROVED: {
     icon: CheckCircle2,
-    label: "Tasdiqlandi",
+    label: "Tasdiqlangan",
     classes: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
   },
   REJECTED: {
     icon: XCircle,
-    label: "Rad etildi",
+    label: "Rad etilgan",
     classes: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
-  }
+  },
 };
 
-interface MyMaterial {
-  id: string;
-  title: string;
-  description: string | null;
-  format: string;
-  driveFileId: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  rejectionReason: string | null;
-  createdAt: Date;
-}
-
-export default function MyMaterialsClient({ initialMaterials }: { initialMaterials: MyMaterial[] }) {
+export default function MyMaterialsClient({ initialMaterials }: { initialMaterials: any[] }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [materials, setMaterials] = useState(initialMaterials);
-  const [previewMaterial, setPreviewMaterial] = useState<MyMaterial | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [previewMaterial, setPreviewMaterial] = useState<any | null>(null);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Rostdan ham ushbu materialni o'chirmoqchimisiz?")) return;
+    if (!confirm("Ushbu materialni o'chirishga ishonchingiz komilmi?")) return;
     
+    setIsDeleting(id);
     const res = await deleteMaterial(id);
+    setIsDeleting(null);
+    
     if (res.error) {
       toast.error(res.error);
     } else {
-      toast.success("Material o'chirildi");
-      setMaterials(materials.filter(m => m.id !== id));
+      toast.success("Material o'chirildi!");
+      setMaterials(materials.filter((m) => m.id !== id));
       router.refresh();
     }
   };
 
   if (materials.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 px-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
-        <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mb-5 shadow-inner">
-          <FileText className="w-10 h-10 text-slate-400" />
+      <>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {t('myMaterialsTitle') || "Mening materiallarim"}
+          </h1>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            {t('myMaterialsDesc') || "Siz yuklagan materiallar holatini shu yerdan kuzatib borishingiz mumkin."}
+          </p>
         </div>
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Siz hali material yuklamagansiz</h3>
-        <p className="text-slate-500 max-w-sm mx-auto">
-          O'quvchilar va boshqa ustozlar bilan o'z bilimingizni ulashing! "Material qo'shish" orqali birinchi faylingizni yuklang.
-        </p>
-        <button
-          onClick={() => router.push("/dashboard/materials/new")}
-          className="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/30 hover:scale-105"
-        >
-          Birinchi materialni qo'shish
-        </button>
-      </div>
+        <div className="flex flex-col items-center justify-center py-20 px-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mb-5 shadow-inner">
+            <FileText className="w-10 h-10 text-slate-400" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Siz hali material yuklamagansiz</h3>
+          <p className="text-slate-500 max-w-sm mx-auto mb-6">
+            O'quvchilar va boshqa ustozlar bilan o'z bilimingizni ulashing! "Material qo'shish" orqali birinchi faylingizni yuklang.
+          </p>
+          <button
+            onClick={() => router.push("/dashboard/materials/new")}
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm shadow-blue-500/20"
+          >
+            + Material qo'shish
+          </button>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          {t('myMaterialsTitle') || "Mening materiallarim"}
+        </h1>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          {t('myMaterialsDesc') || "Siz yuklagan materiallar holatini shu yerdan kuzatib borishingiz mumkin."}
+        </p>
+      </div>
+      <div className="space-y-6">
       {/* View Toggle */}
       <div className="flex justify-end mb-4">
         <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -219,14 +233,14 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
-                <tr>
-                  <th className="px-6 py-4 w-16 text-center">№</th>
-                  <th className="px-6 py-4">Sarlavha (Fayl nomi)</th>
-                  <th className="px-6 py-4">Format / Turi</th>
-                  <th className="px-6 py-4">Holat</th>
-                  <th className="px-6 py-4">Sana / Qo'shilgan vaqti</th>
-                  <th className="px-6 py-4 text-right">Amallar</th>
-                </tr>
+                  <tr>
+                    <th className="px-6 py-4 w-16 text-center">{t('no') || "№"}</th>
+                    <th className="px-6 py-4">{t('titleFileName') || "Sarlavha (Fayl nomi)"}</th>
+                    <th className="px-6 py-4">{t('formatType') || "Format / Turi"}</th>
+                    <th className="px-6 py-4">{t('status') || "Holat"}</th>
+                    <th className="px-6 py-4">{t('dateAdded') || "Sana / Qo'shilgan vaqti"}</th>
+                    <th className="px-6 py-4 text-right">{t('actions') || "Amallar"}</th>
+                  </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {materials.map((material, index) => {
@@ -272,7 +286,7 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
                       <td className="px-6 py-4">
                         <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-bold tracking-wide uppercase ${statusCfg.classes}`}>
                           <StatusIcon className="w-3.5 h-3.5" />
-                          {statusCfg.label}
+                          {t(material.status.toLowerCase()) || statusCfg.label}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium">
@@ -311,5 +325,6 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
         material={previewMaterial as any}
       />
     </div>
+    </>
   );
 }

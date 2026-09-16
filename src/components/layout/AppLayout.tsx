@@ -21,7 +21,7 @@ export default function AppLayout({ children, role, email, name, department, pen
     { href: "/admin/teachers", icon: Users, label: t('teachers') },
     { href: "/admin/departments", icon: Building, label: t('departments') },
     { href: "/admin/materials", icon: FileText, label: t('materials') },
-    { href: "/admin/materials/pending", icon: FileText, label: "Kutilayotganlar", badge: pendingCount },
+    { href: "/admin/materials/pending", icon: FileText, label: t('pendingMaterialsTitle') || "Kutilayotganlar", badge: pendingCount },
     { href: "/admin/resources", icon: BookOpen, label: t('resources') },
     { href: "/admin/library", icon: Library, label: t('library') },
     { href: "/admin/contact", icon: Users, label: t('contact') },
@@ -88,7 +88,7 @@ export default function AppLayout({ children, role, email, name, department, pen
                 }`}
               >
                 <FileText className={`w-5 h-5 ${pathname === '/dashboard/materials/new' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                Material qo'shish
+                {t('addMaterialTitle') || "Material qo'shish"}
               </Link>
               <Link 
                 href="/dashboard/my-materials" 
@@ -99,7 +99,7 @@ export default function AppLayout({ children, role, email, name, department, pen
                 }`}
               >
                 <Library className={`w-5 h-5 ${pathname === '/dashboard/my-materials' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                Mening materiallarim
+                {t('myMaterialsTitle') || "Mening materiallarim"}
               </Link>
               <Link 
                 href="/dashboard/my-resources" 
@@ -110,7 +110,7 @@ export default function AppLayout({ children, role, email, name, department, pen
                 }`}
               >
                 <Link2 className={`w-5 h-5 ${pathname === '/dashboard/my-resources' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                Mening Resurslarim
+                {t('myResourcesTitle') || "Mening Resurslarim"}
               </Link>
             </>
           )}

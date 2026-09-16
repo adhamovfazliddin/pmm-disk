@@ -5,17 +5,11 @@ import { useRouter } from "next/navigation";
 import { createMaterial } from "@/app/actions/material";
 import { toast } from "sonner";
 import { FileText, Link as LinkIcon, Loader2, Video, Presentation, FileArchive, File, Type, AlignLeft } from "lucide-react";
-
-const FORMAT_OPTIONS = [
-  { id: "PDF", label: "PDF Hujjat", icon: FileText, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10", border: "border-red-200 dark:border-red-500/20" },
-  { id: "Document", label: "Word (DOCX)", icon: File, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-500/10", border: "border-blue-200 dark:border-blue-500/20" },
-  { id: "Presentation", label: "Taqdimot", icon: Presentation, color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10", border: "border-orange-200 dark:border-orange-500/20" },
-  { id: "Video", label: "Video Darslik", icon: Video, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10", border: "border-indigo-200 dark:border-indigo-500/20" },
-  { id: "Archive", label: "Arxiv (ZIP)", icon: FileArchive, color: "text-slate-500", bg: "bg-slate-50 dark:bg-slate-500/10", border: "border-slate-200 dark:border-slate-500/20" },
-];
+import { useLanguage } from "@/lib/i18n";
 
 export default function NewMaterialClient() {
   const router = useRouter();
+  const { t } = useLanguage();
   
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -24,34 +18,52 @@ export default function NewMaterialClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
+  const FORMAT_OPTIONS = [
+    { id: "PDF", label: t('pdfDoc') || "PDF Hujjat", icon: FileText, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10", border: "border-red-200 dark:border-red-500/20" },
+    { id: "Document", label: t('wordDoc') || "Word (DOCX)", icon: File, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-500/10", border: "border-blue-200 dark:border-blue-500/20" },
+    { id: "Presentation", label: t('presentation') || "Taqdimot", icon: Presentation, color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10", border: "border-orange-200 dark:border-orange-500/20" },
+    { id: "Video", label: t('videoTutorial') || "Video Darslik", icon: Video, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10", border: "border-indigo-200 dark:border-indigo-500/20" },
+    { id: "Archive", label: t('archiveZip') || "Arxiv (ZIP)", icon: FileArchive, color: "text-slate-500", bg: "bg-slate-50 dark:bg-slate-500/10", border: "border-slate-200 dark:border-slate-500/20" },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setFieldErrors({});
 
-    const result = await createMaterial({
-      title,
-      description,
-      format,
-      driveUrl,
-    });
-
-    setIsSubmitting(false);
-
-    if (result.error) {
-      if (result.fieldErrors) {
-        setFieldErrors(result.fieldErrors);
+    try {
+      const res = await createMaterial({ title, description, format, driveUrl });
+      if (res.error) {
+        if (res.details) {
+          setFieldErrors(res.details);
+          toast.error(t('fillFieldsCorrectly') || "Iltimos, maydonlarni to'g'ri to'ldiring");
+        } else {
+          toast.error(res.error);
+        }
       } else {
-        toast.error(result.error);
+        toast.success(t('materialCreated') || "Material yaratildi! Admin tasdiqlashini kuting.");
+        router.push("/dashboard/my-materials");
       }
-    } else {
-      toast.success("Material yuborildi! Admin tasdiqlashini kuting.");
-      router.push("/dashboard/my-materials");
+    } catch (error) {
+      toast.error(t('errorOccurred') || "Xatolik yuz berdi. Qaytadan urinib ko'ring.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          {t('addMaterialTitle') || "Yangi material qo'shish"}
+        </h1>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          {t('addMaterialDesc') || "O'zingiz yaratgan uslubiy qullanma yoki qo'llanmalarni platformaga yuklang. Sizning materialingiz Admin tomonidan tasdiqlangandan so'ng, sizning katalogingizda paydo bo'ladi."}
+        </p>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: Inputs */}
@@ -59,7 +71,7 @@ export default function NewMaterialClient() {
           
           {/* Title Input */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Material nomi *</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">{t('materialName') || "Material nomi *"}</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Type className="h-5 w-5 text-slate-400" />
@@ -70,7 +82,7 @@ export default function NewMaterialClient() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all shadow-sm"
-                placeholder="Masalan: 1-mavzu Taqdimoti"
+                placeholder={t('materialNamePlaceholder') || "Masalan: 1-mavzu Taqdimoti"}
               />
             </div>
             {fieldErrors.title && <p className="text-xs text-red-500 mt-1.5 ml-1">{fieldErrors.title[0]}</p>}
@@ -78,7 +90,7 @@ export default function NewMaterialClient() {
 
           {/* Drive URL Input */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Google Drive Havolasi *</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">{t('driveLink') || "Google Drive Havolasi *"}</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500">
                 <LinkIcon className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
@@ -92,15 +104,14 @@ export default function NewMaterialClient() {
                 placeholder="https://drive.google.com/file/d/.../view"
               />
             </div>
-            <p className="text-[11px] text-slate-500 mt-2 ml-1 flex items-center gap-1.5 bg-blue-50/50 dark:bg-blue-500/5 text-blue-600 dark:text-blue-400 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30 w-fit">
-              <FileText className="w-3.5 h-3.5" /> Faylga ruxsat <b>"Hammaga ko'rishga ruxsat berish"</b> qilib sozlanganligiga ishonch hosil qiling.
+            <p className="text-[11px] text-slate-500 mt-2 ml-1 flex items-center gap-1.5 bg-blue-50/50 dark:bg-blue-500/5 text-blue-600 dark:text-blue-400 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30 w-fit" dangerouslySetInnerHTML={{ __html: t('filePermissionHelp') || 'Faylga ruxsat "Hammaga ko\'rishga ruxsat berish" qilib sozlanganligiga ishonch hosil qiling.' }}>
             </p>
             {fieldErrors.driveUrl && <p className="text-xs text-red-500 mt-1.5 ml-1">{fieldErrors.driveUrl[0]}</p>}
           </div>
 
           {/* Description Textarea */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Qisqacha tavsif (ixtiyoriy)</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">{t('shortDescription') || "Qisqacha tavsif (ixtiyoriy)"}</label>
             <div className="relative">
               <div className="absolute top-3.5 left-4 pointer-events-none">
                 <AlignLeft className="h-5 w-5 text-slate-400" />
@@ -110,7 +121,7 @@ export default function NewMaterialClient() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all shadow-sm resize-none"
-                placeholder="Ushbu material haqida ma'lumot qoldiring..."
+                placeholder={t('descPlaceholder') || "Ushbu material haqida ma'lumot qoldiring..."}
               />
             </div>
           </div>
@@ -118,7 +129,7 @@ export default function NewMaterialClient() {
 
         {/* Right Column: Format Selection */}
         <div className="lg:col-span-5 space-y-3">
-          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Fayl formati *</label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">{t('fileFormat') || "Fayl formati *"}</label>
           <div className="grid grid-cols-2 gap-3 h-[calc(100%-28px)]">
             {FORMAT_OPTIONS.map((opt, index) => {
               const isSelected = format === opt.id;
@@ -153,16 +164,18 @@ export default function NewMaterialClient() {
           onClick={() => router.back()}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
         >
-          Bekor qilish
+          {t('cancel') || "Bekor qilish"}
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !title.trim() || !driveUrl.trim()}
           className="px-8 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[160px] transition-all shadow-sm shadow-blue-500/30"
         >
-          {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Yuborish"}
+          {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (t('submit') || "Yuborish")}
         </button>
       </div>
     </form>
+      </div>
+    </>
   );
 }

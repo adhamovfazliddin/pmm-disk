@@ -7,6 +7,7 @@ import { approveMaterial, rejectMaterial } from "@/app/actions/material";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import MaterialPreviewModal from "@/components/MaterialPreviewModal";
+import { useLanguage } from "@/lib/i18n";
 
 const FORMAT_ICONS = {
   PDF: <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 shadow-sm border border-red-100 dark:border-red-900/30"><FileText className="w-4 h-4" /></div>,
@@ -35,6 +36,7 @@ interface PendingMaterial {
 
 export default function PendingMaterialsClient({ initialMaterials }: { initialMaterials: PendingMaterial[] }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [materials, setMaterials] = useState(initialMaterials);
   const [previewMaterial, setPreviewMaterial] = useState<PendingMaterial | null>(null);
   
@@ -184,9 +186,9 @@ export default function PendingMaterialsClient({ initialMaterials }: { initialMa
         <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mb-6">
           <CheckCircle2 className="w-10 h-10 text-emerald-500" />
         </div>
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Hamma narsa joyida!</h3>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('everythingIsFine') || "Hamma narsa joyida!"}</h3>
         <p className="text-slate-500 dark:text-slate-400 max-w-sm">
-          Ayni paytda tasdiqlashni kutayotgan materiallar yo'q. Barcha yuborilgan fayllar ko'rib chiqilgan.
+          {t('noPendingMaterials') || "Ayni paytda tasdiqlashni kutayotgan materiallar yo'q. Barcha yuborilgan fayllar ko'rib chiqilgan."}
         </p>
       </div>
     );
@@ -274,12 +276,12 @@ export default function PendingMaterialsClient({ initialMaterials }: { initialMa
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:border-slate-600"
                   />
                 </th>
-                <th className="px-4 py-4 w-16 text-center">No</th>
-                <th className="px-4 py-4">Fayl</th>
-                <th className="px-4 py-4">Sarlavha va Fan</th>
-                <th className="px-4 py-4">Yuklagan shaxs</th>
-                <th className="px-4 py-4">Sana</th>
-                <th className="px-6 py-4 text-right">Amallar</th>
+                <th className="px-4 py-4 w-16 text-center">{t('no') || "No"}</th>
+                <th className="px-4 py-4">{t('file') || "Fayl"}</th>
+                <th className="px-4 py-4">{t('titleAndSubject') || "Sarlavha va Fan"}</th>
+                <th className="px-4 py-4">{t('uploadedBy') || "Yuklagan shaxs"}</th>
+                <th className="px-4 py-4">{t('date') || "Sana"}</th>
+                <th className="px-6 py-4 text-right">{t('actions') || "Amallar"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -389,7 +391,7 @@ export default function PendingMaterialsClient({ initialMaterials }: { initialMa
                             onClick={() => setIsRejecting(material.id)}
                             disabled={processingId === material.id || isBulkApproving}
                             className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-500/10 rounded-xl transition-colors"
-                            title="Rad etish"
+                            title={t('reject') || "Rad etish"}
                           >
                             <XCircle className="w-4 h-4" />
                           </button>
@@ -403,7 +405,7 @@ export default function PendingMaterialsClient({ initialMaterials }: { initialMa
                             ) : (
                               <CheckCircle2 className="w-4 h-4" />
                             )}
-                            Tasdiqlash
+                            {t('approve') || "Tasdiqlash"}
                           </button>
                         </>
                       )}

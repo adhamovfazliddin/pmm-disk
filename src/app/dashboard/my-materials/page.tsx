@@ -32,13 +32,6 @@ export default async function MyMaterialsPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Mening materiallarim</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          Siz yuklagan materiallar holatini shu yerdan kuzatib borishingiz mumkin.
-        </p>
-      </div>
-      
       <MyMaterialsClient initialMaterials={materials} />
     </div>
   );
