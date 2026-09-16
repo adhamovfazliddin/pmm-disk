@@ -29,7 +29,7 @@ export default async function PendingMaterialsPage() {
       }
     },
     orderBy: {
-      createdAt: 'desc'
+      createdAt: 'asc'
     }
   });
 

@@ -49,6 +49,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Xavfsizlik: Brute-force himoyasi
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
   materialsCreated  Material[] @relation("MaterialCreatedBy")
   materialsUploaded Material[] @relation("MaterialUploadedBy")
   materialsReviewed Material[] @relation("MaterialReviewedBy")
@@ -60,7 +64,22 @@ model User {
   teacherResources    Resource[] @relation("ResourceTeachers")
   
   bookmarks           Bookmark[]
+  personalResources   PersonalResource[]
 }
+
+model PersonalResource {
+  id          String   @id @default(cuid())
+  title       String
+  url         String
+  type        String   // "video" yoki "link"
+  category    String?
+  description String?
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 
 model Bookmark {
   id        String   @id @default(cuid())

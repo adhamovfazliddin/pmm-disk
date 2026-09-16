@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LogOut, LayoutDashboard, Users, FileText, Sun, Moon, Settings, Building, BookOpen, Library } from "lucide-react";
+import { LogOut, LayoutDashboard, Users, FileText, Sun, Moon, Settings, Building, BookOpen, Library, Link2 } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { useLanguage } from "@/lib/i18n";
 import { useTheme } from "next-themes";
@@ -100,6 +100,17 @@ export default function AppLayout({ children, role, email, name, department, pen
               >
                 <Library className={`w-5 h-5 ${pathname === '/dashboard/my-materials' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
                 Mening materiallarim
+              </Link>
+              <Link 
+                href="/dashboard/my-resources" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  pathname === '/dashboard/my-resources'
+                    ? 'bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400' 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <Link2 className={`w-5 h-5 ${pathname === '/dashboard/my-resources' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                Mening Resurslarim
               </Link>
             </>
           )}

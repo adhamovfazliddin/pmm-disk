@@ -17,7 +17,7 @@ export async function login(prevState: unknown, formData: FormData) {
 
   const parsed = loginSchema.safeParse({ email, password });
   if (!parsed.success) {
-    return { error: "Invalid input." };
+    return { error: "Yaroqsiz ma'lumotlar." };
   }
 
   const user = await prisma.user.findUnique({
@@ -25,18 +25,43 @@ export async function login(prevState: unknown, formData: FormData) {
   });
 
   if (!user || !user.isActive) {
-    return { error: "Invalid credentials or account is disabled." };
+    return { error: "Login yoki parol xato, yoxud hisob o'chirilgan." };
+  }
+
+  // Brute-force himoyasi
+  if (user.lockedUntil && user.lockedUntil > new Date()) {
+    const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
+    return { error: `Hisobingiz vaqtincha bloklangan. Iltimos, ${minutesLeft} daqiqadan so'ng qayta urinib ko'ring.` };
   }
 
   const validPassword = await bcrypt.compare(parsed.data.password, user.password);
+  
   if (!validPassword) {
-    return { error: "Invalid credentials." };
+    const attempts = (user.failedLoginAttempts || 0) + 1;
+    const lockDuration = 15 * 60 * 1000; // 15 daqiqa
+    
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: attempts,
+        lockedUntil: attempts >= 5 ? new Date(Date.now() + lockDuration) : null,
+      }
+    });
+
+    if (attempts >= 5) {
+      return { error: "Xavfsizlik sababli hisobingiz 15 daqiqaga bloklandi." };
+    }
+    return { error: "Login yoki parol xato." };
   }
 
-  // Oxirgi kirish vaqtini yangilash
+  // Muvaffaqiyatli kirish - urinishlarni tozalash va vaqtni yangilash
   await prisma.user.update({
     where: { id: user.id },
-    data: { lastLoginAt: new Date() },
+    data: { 
+      lastLoginAt: new Date(),
+      failedLoginAttempts: 0,
+      lockedUntil: null
+    },
   });
 
   const rememberMe = formData.get("rememberMe") === "on";

@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { name: true, description: true, driveFolderId: true, departmentId: true, role: true, department: { select: { driveFolderId: true } } }
+    select: { name: true, description: true, driveFolderId: true, departmentId: true, role: true, department: { select: { driveFolderId: true, name: true } } }
   });
 
   if (!user) {
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     : (user.departmentId ? String(user.departmentId) : null);
 
   // ✅ Parallel so'rovlar — 3x tezroq
-  const [materials, dbResources, dbBookmarks] = await Promise.all([
+  const [materials, dbResources, dbBookmarks, personalResources] = await Promise.all([
     prisma.material.findMany({
       where: {
         status: "APPROVED",
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
           ...(user.departmentId ? [{ assignments: { some: { teacherId: user.departmentId } } }] : [])
         ]
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
       select: {
         id: true,
         title: true,
@@ -75,11 +75,15 @@ export default async function DashboardPage() {
         departments: { select: { id: true } },
         teachers: { select: { id: true } }
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "asc" }
     }).catch(() => []),
     prisma.bookmark.findMany({
       where: { userId: currentTeacherId },
       select: { itemId: true }
+    }).catch(() => []),
+    prisma.personalResource.findMany({
+      where: { ownerId: session.userId },
+      orderBy: { createdAt: "asc" }
     }).catch(() => [])
   ]);
 
@@ -92,9 +96,24 @@ export default async function DashboardPage() {
   const initialBookmarks = dbBookmarks.map(b => b.itemId);
 
   // Shaxsiy statistika hisoblash (O'ziga tegishli yoki yaratgan materiallar uchun)
-  const personalMaterialsIds = materials
-    .filter(m => m.visibility === "RESTRICTED" || m.assignments.length > 0)
-    .map(m => m.id);
+  let uploaderIds = [session.userId];
+  if (user.role === 'DEPARTMENT') {
+    const deptTeachers = await prisma.user.findMany({
+      where: { departmentId: session.userId },
+      select: { id: true }
+    });
+    uploaderIds = [...uploaderIds, ...deptTeachers.map(t => t.id)];
+  }
+
+  const myMaterials = await prisma.material.findMany({
+    where: {
+      uploadedById: { in: uploaderIds },
+      status: "APPROVED"
+    },
+    select: { id: true }
+  });
+  
+  const personalMaterialsIds = myMaterials.map(m => m.id);
 
   let totalViews = 0;
   let totalDownloads = 0;
@@ -125,11 +144,13 @@ export default async function DashboardPage() {
       initialMaterials={materials} 
       sessionName={user.name} 
       role={user.role}
+      departmentName={user.department?.name}
       description={user.description} 
       driveFolderId={user.driveFolderId || user.department?.driveFolderId} 
       initialGlobalResources={globalResources}
       initialBookmarks={initialBookmarks}
       personalStats={personalStats}
+      initialPersonalResources={personalResources}
     />
   );
 }

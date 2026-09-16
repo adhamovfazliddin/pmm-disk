@@ -1,7 +1,11 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const secretKey = process.env.SESSION_SECRET || "default_secret_key_change_me_in_prod";
+const envSecret = process.env.SESSION_SECRET;
+if (!envSecret && process.env.NODE_ENV === "production") {
+  throw new Error("CRITICAL SECURITY ERROR: SESSION_SECRET is not set in production. Set this environment variable immediately.");
+}
+const secretKey = envSecret || "default_secret_key_change_me_in_prod";
 const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function encrypt(payload: Record<string, unknown>, expiresIn: string = "7d") {

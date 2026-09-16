@@ -5,7 +5,7 @@ import MaterialsClient from "./MaterialsClient";
 export default async function MaterialsPage() {
   const [materials, assignees] = await Promise.all([
     prisma.material.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
       select: {
         id: true,
         title: true,

@@ -5,7 +5,15 @@ const prisma = new PrismaClient();
 
 async function main() {
   const superadminEmail = process.env.SUPERADMIN_EMAIL || 'adminpmm@example.com';
-  const superadminPassword = process.env.SUPERADMIN_PASSWORD || 'adminpmm1425!';
+  let superadminPassword = process.env.SUPERADMIN_PASSWORD;
+  let isGeneratedPassword = false;
+
+  if (!superadminPassword) {
+    // Xavfsizlik uchun default parol o'rniga tasodifiy parol yaratish
+    const crypto = require('crypto');
+    superadminPassword = crypto.randomBytes(12).toString('base64');
+    isGeneratedPassword = true;
+  }
 
   const hashedPassword = await bcrypt.hash(superadminPassword, 10);
   
@@ -22,7 +30,17 @@ async function main() {
       role: Role.SUPERADMIN,
     },
   });
-  console.log(`Ensured superadmin: ${superadminEmail} with updated password`);
+  
+  console.log(`Ensured superadmin: ${superadminEmail}`);
+  if (isGeneratedPassword) {
+    console.log(`\n=============================================================`);
+    console.log(`[WARNING] SUPERADMIN_PASSWORD kiritilmagan!`);
+    console.log(`Xavfsizlik maqsadida avtomatik ravishda tasodifiy parol yaratildi:`);
+    console.log(`Email: ${superadminEmail}`);
+    console.log(`Password: ${superadminPassword}`);
+    console.log(`Iltimos, ushbu parolni saqlab qo'ying yoki darhol o'zgartiring!`);
+    console.log(`=============================================================\n`);
+  }
 }
 
 main()

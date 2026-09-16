@@ -360,11 +360,13 @@ export default function MaterialsClient({ initialMaterials, activeAssignees }: {
                   </td>
                   <td className="p-4 align-middle">
                     <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-                      {new Date((material as any).createdAt || Date.now()).toLocaleDateString("ru-RU", {
+                      {new Date((material as any).createdAt || Date.now()).toLocaleString("ru-RU", {
                         day: '2-digit',
                         month: '2-digit',
-                        year: 'numeric'
-                      })}
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }).replace(',', '')}
                     </span>
                   </td>
                   <td className="p-4 align-middle text-right">

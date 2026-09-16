@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2, Building, GraduationCap, Users } from "lucide-react";
+import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2, Building, GraduationCap, Users, Plus, Edit2, Trash2, X, Loader2 } from "lucide-react";
 import { extractDriveFolderId, getDriveDownloadUrl } from "@/lib/drive";
 
 import { useLanguage } from "@/lib/i18n";
@@ -75,20 +75,24 @@ export default function DashboardClient({
   initialMaterials, 
   sessionName,
   role,
+  departmentName,
   description,
   driveFolderId,
   initialGlobalResources,
   initialBookmarks,
-  personalStats
+  personalStats,
+  initialPersonalResources
 }: { 
   initialMaterials: Material[], 
   sessionName: string,
   role?: string,
+  departmentName?: string,
   description?: string | null,
   driveFolderId?: string | null,
   initialGlobalResources?: any[],
   initialBookmarks: string[],
-  personalStats?: { materials: number, views: number, downloads: number }
+  personalStats?: { materials: number, views: number, downloads: number },
+  initialPersonalResources?: any[]
 }) {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
@@ -109,10 +113,22 @@ export default function DashboardClient({
     ? { materials: driveFiles.length, views: driveStats.views, downloads: driveStats.downloads }
     : personalStats;
   
-  const [localResources, setLocalResources] = useState(initialGlobalResources || []);
+  const [localResources, setLocalResources] = useState(() => {
+    const globalRes = initialGlobalResources || [];
+    const personalRes = initialPersonalResources || [];
+    return [...globalRes, ...personalRes];
+  });
   const [resourceSearch, setResourceSearch] = useState("");
   const [resourceFilter, setResourceFilter] = useState("ALL");
   const [resourceViewMode, setResourceViewMode] = useState<"grid" | "list">("grid");
+
+  // Shaxsiy resurslar state
+  const [personalResources, setPersonalResources] = useState<any[]>(initialPersonalResources || []);
+  const [isPersonalResourceModalOpen, setIsPersonalResourceModalOpen] = useState(false);
+  const [editingPersonalResource, setEditingPersonalResource] = useState<any | null>(null);
+  const [personalResourceForm, setPersonalResourceForm] = useState({ title: "", url: "", type: "link", category: "", description: "" });
+  const [personalResourceLoading, setPersonalResourceLoading] = useState(false);
+  const [personalResourceError, setPersonalResourceError] = useState("");
 
   const filteredLocalResources = localResources.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(resourceSearch.toLowerCase()) || 
@@ -284,6 +300,12 @@ export default function DashboardClient({
                    {role === "TEACHER" ? (t('teacherDashboardTitle') || "O'qituvchi Boshqaruv Paneli") : (t('departmentDashboardTitle') || "Kafedra Boshqaruv Paneli")}
                  </h1>
                  <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+                   {role === "TEACHER" && departmentName && (
+                     <span className="text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
+                       {departmentName} 
+                       <span className="text-slate-300 dark:text-slate-600">|</span>
+                     </span>
+                   )}
                    <span className="text-blue-700 dark:text-blue-400 font-semibold">{sessionName}</span>
                    {description && <span className="text-sm text-slate-500 dark:text-slate-400 border-l border-slate-300 dark:border-slate-700 pl-3">{description}</span>}
                  </div>
@@ -576,8 +598,10 @@ export default function DashboardClient({
               ))}
             </div>
           )}
+
         </div>
       )}
+
 
       {/* Platform Materials & Drive Materials (Unified UI) */}
       {activeTab !== "resources" && (
@@ -724,7 +748,7 @@ export default function DashboardClient({
                   <FormatBadge format={material.format} />
                   <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 gap-1.5 font-medium">
                     <Calendar className="w-3.5 h-3.5" />
-                    {new Date(material.createdAt).toLocaleDateString("ru-RU", { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    {new Date(material.createdAt).toLocaleString("ru-RU", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
                   </div>
                 </div>
 
@@ -807,7 +831,7 @@ export default function DashboardClient({
               <tbody>
                 {displayMaterials.map((material, index) => (
                   <tr key={material.id} className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all group">
-                    <td className="p-4 text-center font-medium text-slate-500">{index + 1}</td>
+                    <td className="p-4 text-center font-medium text-slate-500">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td className="p-4 align-middle font-medium text-slate-900 dark:text-slate-100 max-w-md">
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 min-w-0">
@@ -871,7 +895,7 @@ export default function DashboardClient({
                     <td className="p-4 align-middle">
                       <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300 font-medium">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        {new Date(material.createdAt).toLocaleDateString("ru-RU", { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        {new Date(material.createdAt).toLocaleString("ru-RU", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
                       </span>
                     </td>
                     <td className="p-4 align-middle text-right">
