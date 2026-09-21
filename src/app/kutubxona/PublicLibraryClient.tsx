@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Search, Eye, Download, Share2, Image as ImageIcon, ChevronLeft, ChevronRight, Globe, Menu, X, BookOpen, BookMarked, FileText, GraduationCap, Moon, Sun, ZoomIn, ZoomOut, Star, User, Calendar, AlignLeft } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 type LangType = 'uz' | 'ru' | 'en';
 

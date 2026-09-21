@@ -16,7 +16,7 @@ export default async function MyMaterialsPage() {
       uploadedById: session.userId as string
     },
     orderBy: {
-      createdAt: 'desc'
+      createdAt: 'asc'
     },
     select: {
       id: true,

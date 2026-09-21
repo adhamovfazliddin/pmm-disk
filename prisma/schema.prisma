@@ -38,7 +38,7 @@ model User {
   role          Role      @default(TEACHER)
   isActive      Boolean   @default(true)
   departmentId  String?
-  department    User?     @relation("TeacherDepartment", fields: [departmentId], references: [id])
+  department    User?     @relation("TeacherDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
   teachers      User[]    @relation("TeacherDepartment")
   description   String?
   driveFolderId String?

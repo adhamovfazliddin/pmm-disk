@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, X, Trash2, ExternalLink, Image as ImageIcon, Book, User, Tag, Link as LinkIcon, Save, Edit3, Calendar, FileText, AlignLeft } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { addLibraryBook, deleteLibraryBook, updateLibraryBook } from "@/app/actions/library";
 import { useLanguage } from "@/lib/i18n";
 

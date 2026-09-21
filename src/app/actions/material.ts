@@ -134,9 +134,6 @@ export async function deleteMaterial(id: string) {
       return { error: "Siz faqat o'zingiz yuklagan materialni o'chira olasiz." };
     }
 
-    // Delete dependent records first to avoid foreign key constraint errors
-    await prisma.materialActivity.deleteMany({ where: { materialId: id } });
-    await prisma.materialAssignment.deleteMany({ where: { materialId: id } });
     await prisma.material.delete({ where: { id } });
     
     revalidatePath("/admin/materials");

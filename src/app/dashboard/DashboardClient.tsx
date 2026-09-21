@@ -254,7 +254,7 @@ export default function DashboardClient({
       webContentLink: file.webContentLink,
       thumbnailLink: file.thumbnailLink
     };
-  });
+  }).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   const [currentPage, setCurrentPage] = useState(1);
   const [resourcesPage, setResourcesPage] = useState(1);

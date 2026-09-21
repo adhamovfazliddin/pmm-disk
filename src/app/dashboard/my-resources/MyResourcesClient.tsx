@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit2, Trash2, X, Loader2, ExternalLink, Link2, Video } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Loader2, ExternalLink, Link2, Video, Globe, Film, Type, Tags, AlignLeft, Layers, PlayCircle } from "lucide-react";
 import { addPersonalResource, updatePersonalResource, deletePersonalResource } from "@/app/actions/personalResource";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/i18n";
@@ -132,7 +132,7 @@ export default function MyResourcesClient({ initialResources }: { initialResourc
                     #{index + 1}
                   </span>
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 ${res.type === "video" ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400" : "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"}`}>
-                    {res.type === "video" ? <Video className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
+                    {res.type === "video" ? <PlayCircle className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
                     {res.type === "video" ? "Video Dars" : "Foydali Link"}
                   </span>
                   {res.category && (
@@ -174,61 +174,90 @@ export default function MyResourcesClient({ initialResources }: { initialResourc
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                {editing ? (t('edit') || "Resursni tahrirlash") : (t('newResource') || "Yangi resurs qo'shish")}
-              </h3>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition-colors">
+          <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-2xl w-full max-w-3xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl ${editing ? 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'}`}>
+                  {editing ? <Edit2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {editing ? (t('edit') || "Resursni tahrirlash") : (t('newResource') || "Yangi resurs qo'shish")}
+                </h3>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-5 space-y-4">
+            
+            <div className="p-6 space-y-6">
+              {/* Type Selection */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">{t('resourceType') || "Tur *"}</label>
-                <div className="flex gap-3">
-                  {[{ v: "link", l: "🌐 " + (t('websiteLink') || "Foydali Link") }, { v: "video", l: "🎬 " + (t('videoLesson') || "Video Dars") }].map(opt => (
-                    <button key={opt.v} type="button" onClick={() => setForm(f => ({ ...f, type: opt.v }))}
-                      className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${form.type === opt.v ? "bg-blue-500 text-white border-blue-500" : "bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600"}`}>
-                      {opt.l}
-                    </button>
-                  ))}
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-blue-500" /> {t('resourceType') || "Resurs turi *"}
+                </label>
+                <div className="flex gap-4">
+                  {[{ v: "link", l: t('websiteLink') || "Veb-sayt / Link", icon: Globe }, { v: "video", l: t('videoLesson') || "Video Dars", icon: PlayCircle }].map(opt => {
+                    const Icon = opt.icon;
+                    const isActive = form.type === opt.v;
+                    return (
+                      <button key={opt.v} type="button" onClick={() => setForm(f => ({ ...f, type: opt.v }))}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium border transition-all ${isActive ? "bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20" : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"}`}>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} /> {opt.l}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">{t('title') || "Sarlavha *"}</label>
-                <input type="text" placeholder="Masalan: React darslari to'plami" value={form.title}
-                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">{t('linkUrl') || "URL manzili *"}</label>
-                <input type="url" placeholder="https://..." value={form.url}
-                  onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">Kategoriya</label>
-                <input type="text" placeholder="Masalan: Matematika, Fizika..." value={form.category}
-                  onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">{t('description') || "Tavsif (ixtiyoriy)"}</label>
-                <textarea rows={2} placeholder="Qisqacha tavsif..." value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none" />
+
+              {/* 2-Column Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                    <Type className="w-4 h-4 text-blue-500" /> {t('title') || "Sarlavha *"}
+                  </label>
+                  <input type="text" placeholder="Masalan: React darslari to'plami" value={form.title}
+                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all" />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                    <Link2 className="w-4 h-4 text-blue-500" /> {t('linkUrl') || "Havola (URL) *"}
+                  </label>
+                  <input type="url" placeholder="https://..." value={form.url}
+                    onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
+                    className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                    <Tags className="w-4 h-4 text-blue-500" /> Kategoriya
+                  </label>
+                  <input type="text" placeholder="Masalan: Matematika, Fizika..." value={form.category}
+                    onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                    className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                    <AlignLeft className="w-4 h-4 text-blue-500" /> {t('description') || "Tavsif (ixtiyoriy)"}
+                  </label>
+                  <input type="text" placeholder="Qisqacha tavsif..." value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all" />
+                </div>
               </div>
             </div>
-            <div className="flex gap-3 p-5 border-t border-slate-100 dark:border-slate-700">
+            
+            <div className="flex justify-end gap-3 px-6 py-5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
               <button onClick={() => setIsModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                 {t('cancel') || "Bekor qilish"}
               </button>
               <button disabled={loading} onClick={handleSave}
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-sm font-semibold shadow transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                className="px-8 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md shadow-blue-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                {editing ? (t('save') || "Saqlash") : (t('add') || "Qo'shish")}
+                {editing ? (t('save') || "Saqlash") : (t('add') || "+ Qo'shish")}
               </button>
             </div>
           </div>
