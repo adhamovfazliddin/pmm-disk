@@ -209,7 +209,14 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
                   
                   <div className="flex justify-end gap-1.5 opacity-100">
                     <button 
-                      onClick={() => setPreviewMaterial(material)}
+                      onClick={() => {
+                        if (material.format === "PDF") {
+                          const url = `/api/preview/${material.driveFileId}`;
+                          window.open(url, "_blank");
+                        } else {
+                          setPreviewMaterial(material);
+                        }
+                      }}
                       className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-500/10 rounded-xl transition-all"
                       title="Ko'rish"
                     >
@@ -295,7 +302,14 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button 
-                            onClick={() => setPreviewMaterial(material)}
+                            onClick={() => {
+                        if (material.format === "PDF") {
+                          const url = `/api/preview/${material.driveFileId}`;
+                          window.open(url, "_blank");
+                        } else {
+                          setPreviewMaterial(material);
+                        }
+                      }}
                             className="p-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-xl transition-colors"
                             title="Ko'rish"
                           >

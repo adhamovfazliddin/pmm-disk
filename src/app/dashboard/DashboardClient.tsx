@@ -785,8 +785,13 @@ export default function DashboardClient({
                     </button>
                     <button
                       onClick={() => {
-                        setSelectedMaterial(material);
-                        setIsPreviewOpen(true);
+                        if (material.format === "PDF") {
+                          const url = `/api/preview/${material.driveFileId}`;
+                          window.open(url, "_blank");
+                        } else {
+                          setSelectedMaterial(material);
+                          setIsPreviewOpen(true);
+                        }
                         // Drive fayl ko'rish statistikasi
                         setDriveStats(prev => ({ ...prev, views: prev.views + 1 }));
                         recordDriveActivity(material.driveFileId, 'VIEW').catch(console.error);
@@ -920,8 +925,13 @@ export default function DashboardClient({
                         </button>
                         <button
                           onClick={() => {
-                            setSelectedMaterial(material);
-                            setIsPreviewOpen(true);
+                            if (material.format === "PDF") {
+                              const url = `/api/preview/${material.driveFileId}`;
+                              window.open(url, "_blank");
+                            } else {
+                              setSelectedMaterial(material);
+                              setIsPreviewOpen(true);
+                            }
                             // Drive fayl bo'lsa statistika oshirish
                             if (activeTab === "drive") {
                               setDriveStats(prev => ({ ...prev, views: prev.views + 1 }));
