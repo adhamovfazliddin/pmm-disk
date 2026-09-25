@@ -1,12 +1,13 @@
 "use client";
 
-import { FileText, Video, Presentation, FileArchive, File, Clock, CheckCircle2, XCircle, AlertCircle, LayoutGrid, List as ListIcon, Trash2, Eye } from "lucide-react";
+import { FileText, Video, Presentation, FileArchive, File, Clock, CheckCircle2, XCircle, AlertCircle, LayoutGrid, List as ListIcon, Trash2, Eye, QrCode } from "lucide-react";
 import { format } from "date-fns";
 import { deleteMaterial } from "@/app/actions/material";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import MaterialPreviewModal from "@/components/MaterialPreviewModal";
+import QRCodeModal from "@/components/QRCodeModal";
 import { useLanguage } from "@/lib/i18n";
 
 const FORMAT_ICONS = {
@@ -42,6 +43,7 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [previewMaterial, setPreviewMaterial] = useState<any | null>(null);
+    const [qrMaterial, setQrMaterial] = useState<any | null>(null);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Ushbu materialni o'chirishga ishonchingiz komilmi?")) return;
@@ -221,7 +223,14 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
                       title="Ko'rish"
                     >
                       <Eye className="w-4 h-4" />
-                    </button>
+                          </button>
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQrMaterial(material); }}
+                            className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:text-purple-400 dark:hover:bg-purple-500/10 rounded-xl transition-all"
+                            title="QR-Kod"
+                          >
+                            <QrCode className="w-4 h-4" />
+                          </button>
                     <button 
                       onClick={() => handleDelete(material.id)}
                       className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:text-rose-400 dark:hover:bg-rose-500/10 rounded-xl transition-all"
@@ -315,6 +324,13 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQrMaterial(material); }}
+                            className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:text-purple-400 dark:hover:bg-purple-500/10 rounded-xl transition-all"
+                            title="QR-Kod"
+                          >
+                            <QrCode className="w-4 h-4" />
+                          </button>
                           <button 
                             onClick={() => handleDelete(material.id)}
                             className="p-2 bg-red-50 dark:bg-red-500/10 text-red-600 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl transition-colors"
@@ -337,6 +353,12 @@ export default function MyMaterialsClient({ initialMaterials }: { initialMateria
         isOpen={!!previewMaterial}
         onClose={() => setPreviewMaterial(null)}
         material={previewMaterial as any}
+      />
+
+      <QRCodeModal 
+        isOpen={!!qrMaterial} 
+        onClose={() => setQrMaterial(null)} 
+        material={qrMaterial} 
       />
     </div>
     </>

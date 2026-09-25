@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2, Building, GraduationCap, Users, Plus, Edit2, Trash2, X, Loader2 } from "lucide-react";
+import { Search, FileText, Video, Presentation, FileArchive, File, ExternalLink, Calendar, Download, LayoutGrid, List, Table, Star, BookOpen, Eye, Folder, PlayCircle, Globe, Share2, Building, GraduationCap, Users, Plus, Edit2, Trash2, X, Loader2, QrCode } from "lucide-react";
 import { extractDriveFolderId, getDriveDownloadUrl } from "@/lib/drive";
 
 import { useLanguage } from "@/lib/i18n";
 import { recordMaterialActivity, recordDriveActivity, getDriveStats } from "@/app/actions/analytics";
 import { fetchDriveFiles, DriveFile } from "@/app/actions/drive";
 import MaterialPreviewModal from "@/components/MaterialPreviewModal";
+import QRCodeModal from "@/components/QRCodeModal";
 import Pagination from "@/components/ui/Pagination";
 import { GridSkeleton } from "@/components/ui/Skeletons";
 import { toast } from "sonner";
@@ -98,6 +99,7 @@ export default function DashboardClient({
   const [searchTerm, setSearchTerm] = useState("");
   const [formatFilter, setFormatFilter] = useState("ALL");
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+    const [qrMaterial, setQrMaterial] = useState<any | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(initialBookmarks || []);
@@ -799,7 +801,14 @@ export default function DashboardClient({
                       className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 px-3 py-2 rounded-md transition-colors"
                     >
                       <ExternalLink className="w-4 h-4" /> {t('preview')}
-                    </button>
+                      </button>
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQrMaterial(material); }}
+                        className="flex items-center justify-center p-2 text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 rounded-md transition-colors"
+                        title="QR-Kod"
+                      >
+                        <QrCode className="w-4 h-4" />
+                      </button>
                     <a
                       href={getDriveDownloadUrl(material.driveFileId, material.format)}
                       target="_blank"
@@ -944,7 +953,14 @@ export default function DashboardClient({
                           title={t('preview')}
                         >
                           <Eye className="w-4 h-4" />
-                        </button>
+                          </button>
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQrMaterial(material); }}
+                            className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:text-purple-400 dark:hover:bg-purple-500/10 rounded-xl transition-all"
+                            title="QR-Kod"
+                          >
+                            <QrCode className="w-4 h-4" />
+                          </button>
                         <a
                           href={getDriveDownloadUrl(material.driveFileId, material.format)}
                           target="_blank"
@@ -994,6 +1010,12 @@ export default function DashboardClient({
         }}
       />
 
+
+      <QRCodeModal 
+        isOpen={!!qrMaterial} 
+        onClose={() => setQrMaterial(null)} 
+        material={qrMaterial} 
+      />
     </div>
   );
 }
