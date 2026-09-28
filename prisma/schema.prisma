@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
@@ -31,66 +31,75 @@ enum MaterialStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
-  name          String
-  role          Role      @default(TEACHER)
-  isActive      Boolean   @default(true)
-  departmentId  String?
-  department    User?     @relation("TeacherDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
-  teachers      User[]    @relation("TeacherDepartment")
-  description   String?
-  driveFolderId String?
-  phone            String?
-  telegram         String?
-  supportContacts  Json      @default("[]")
-  lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  email           String    @unique
+  password        String
+  name            String
+  role            Role      @default(TEACHER)
+  isActive        Boolean   @default(true)
+  departmentId    String?
+  department      User?     @relation("TeacherDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
+  teachers        User[]    @relation("TeacherDepartment")
+  description     String?
+  driveFolderId   String?
+  phone           String?
+  telegram        String?
+  supportContacts Json      @default("[]")
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   // Xavfsizlik: Brute-force himoyasi
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
 
-  materialsCreated  Material[] @relation("MaterialCreatedBy")
-  materialsUploaded Material[] @relation("MaterialUploadedBy")
-  materialsReviewed Material[] @relation("MaterialReviewedBy")
+  materialsCreated  Material[]           @relation("MaterialCreatedBy")
+  materialsUploaded Material[]           @relation("MaterialUploadedBy")
+  materialsReviewed Material[]           @relation("MaterialReviewedBy")
   assignedMaterials MaterialAssignment[]
-  activities       MaterialActivity[]
-  driveActivities  DriveActivity[]
+  activities        MaterialActivity[]
+  driveActivities   DriveActivity[]
 
   departmentResources Resource[] @relation("ResourceDepartments")
   teacherResources    Resource[] @relation("ResourceTeachers")
-  
-  bookmarks           Bookmark[]
-  personalResources   PersonalResource[]
+
+  bookmarks         Bookmark[]
+  personalResources PersonalResource[]
+
+  @@index([role])
+  @@index([departmentId])
+  @@index([isActive])
 }
 
 model PersonalResource {
   id          String   @id @default(cuid())
   title       String
   url         String
-  type        String   // "video" yoki "link"
+  type        String // "video" yoki "link"
   category    String?
   description String?
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([type])
+  @@index([category])
 }
 
-
 model Bookmark {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  itemId    String
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  itemId String
+
   createdAt DateTime @default(now())
 
   @@unique([userId, itemId])
+  @@index([userId])
+  @@index([itemId])
 }
 
 model Resource {
@@ -102,57 +111,71 @@ model Resource {
   category    String
   visibility  Visibility @default(GLOBAL)
 
-  departments User[]     @relation("ResourceDepartments")
-  teachers    User[]     @relation("ResourceTeachers")
+  departments User[] @relation("ResourceDepartments")
+  teachers    User[] @relation("ResourceTeachers")
 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([category])
+  @@index([visibility])
 }
 
 model Material {
-  id          String         @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   description String?
   subject     String
-  format      String   // e.g. "PDF", "Video", "Document", "Presentation"
+  format      String // e.g. "PDF", "Video", "Document", "Presentation"
   driveFileId String
-  visibility  Visibility     @default(GLOBAL)
-  
+  visibility  Visibility @default(GLOBAL)
+
   // Moderatsiya maydonlari
-  status      MaterialStatus @default(APPROVED)
-  
+  status MaterialStatus @default(APPROVED)
+
   // Kim yaratgan (Admin)
   createdById String
-  createdBy   User           @relation("MaterialCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
-  
+  createdBy   User   @relation("MaterialCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
   // Kim yuklagan (O'qituvchi yoki Kafedra o'zi yuklasa)
-  uploadedById   String?
-  uploadedBy     User?        @relation("MaterialUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedById String?
+  uploadedBy   User?   @relation("MaterialUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   // Rad etish sababi
   rejectionReason String?
 
   // Kim tekshirgan (Super Admin)
   reviewedById String?
-  reviewedBy   User?        @relation("MaterialReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedBy   User?     @relation("MaterialReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
   reviewedAt   DateTime?
-  
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   assignments MaterialAssignment[]
   activities  MaterialActivity[]
+
+  @@index([createdById])
+  @@index([uploadedById])
+  @@index([reviewedById])
+  @@index([status])
+  @@index([visibility])
+  @@index([subject])
+  @@index([format])
 }
 
 model MaterialAssignment {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   materialId String
   teacherId  String
 
-  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
-  teacher    User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  teacher  User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@unique([materialId, teacherId])
+  @@index([materialId])
+  @@index([teacherId])
 }
 
 model MaterialActivity {
@@ -162,8 +185,12 @@ model MaterialActivity {
   actionType ActionType
   createdAt  DateTime   @default(now())
 
-  material   Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
-  teacher    User?      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  teacher  User?    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([materialId])
+  @@index([teacherId])
+  @@index([actionType])
 }
 
 model LibraryBook {
@@ -178,6 +205,10 @@ model LibraryBook {
   annotation      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([title])
+  @@index([author])
+  @@index([category])
 }
 
 model DriveActivity {
@@ -187,5 +218,8 @@ model DriveActivity {
   userId      String?
   createdAt   DateTime   @default(now())
 
-  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([driveFileId])
+  @@index([userId])
 }

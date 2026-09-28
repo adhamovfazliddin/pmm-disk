@@ -59,13 +59,13 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
       <div className="flex items-center gap-4 animate-in slide-in-from-left-4 duration-300">
         <button
           onClick={() => router.push('/admin/teachers')}
-          className="p-2.5 rounded-xl bg-white dark:bg-[#111827]/90 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all group"
+          className="shrink-0 p-2.5 rounded-xl bg-white dark:bg-[#111827]/90 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all group"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">O'qituvchi profili</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">O'qituvchining to'liq ma'lumotlari va faoliyati</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white break-words">O'qituvchi profili</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate">O'qituvchining to'liq ma'lumotlari va faoliyati</p>
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
 
               {/* Info */}
               <div className="mt-4 space-y-1">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{teacher.name}</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white break-words">{teacher.name}</h2>
                 <div className="flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 font-medium">
                   <UserIcon className="w-4 h-4" />
                   {teacher.department ? teacher.department.name : 'Kafedra biriktirilmagan'}
@@ -108,7 +108,7 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                   <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
                     <Mail className="w-4 h-4" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-slate-500 dark:text-slate-400">Email</p>
                     <p className="font-medium text-slate-800 dark:text-slate-200 break-all">{teacher.email}</p>
                   </div>
@@ -119,9 +119,9 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                     <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-500 shrink-0 mt-0.5">
                       <BookOpen className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-slate-500 dark:text-slate-400">Tavsif (Ilmiy unvon, ma'lumot)</p>
-                      <p className="font-medium text-slate-800 dark:text-slate-200 leading-relaxed mt-0.5">{teacher.description}</p>
+                      <p className="font-medium text-slate-800 dark:text-slate-200 leading-relaxed mt-0.5 break-words">{teacher.description}</p>
                     </div>
                   </div>
                 )}
@@ -131,9 +131,9 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                     <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
                       <Phone className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-slate-500 dark:text-slate-400">Telefon</p>
-                      <p className="font-medium text-slate-800 dark:text-slate-200">{teacher.phone}</p>
+                      <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{teacher.phone}</p>
                     </div>
                   </div>
                 )}
@@ -142,9 +142,9 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                   <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
                     <Calendar className="w-4 h-4" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-slate-500 dark:text-slate-400">Tizimga qo'shilgan</p>
-                    <p className="font-medium text-slate-800 dark:text-slate-200">{new Date(teacher.createdAt).toLocaleDateString('uz-UZ')}</p>
+                    <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{new Date(teacher.createdAt).toLocaleDateString('uz-UZ')}</p>
                   </div>
                 </div>
 
@@ -152,9 +152,9 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                   <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
                     <Clock className="w-4 h-4" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-slate-500 dark:text-slate-400">Oxirgi marta kirgan</p>
-                    <p className="font-medium text-slate-800 dark:text-slate-200">{formatLastLogin(teacher.lastLoginAt)}</p>
+                    <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{formatLastLogin(teacher.lastLoginAt)}</p>
                   </div>
                 </div>
 
@@ -195,7 +195,7 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                 </div>
                 <h3 className="text-sm font-medium text-slate-600 dark:text-slate-400">Materiallar</h3>
               </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalMaterials}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white truncate">{stats.totalMaterials}</p>
             </div>
             
             <div className="bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-300 delay-150">
@@ -205,7 +205,7 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                 </div>
                 <h3 className="text-sm font-medium text-slate-600 dark:text-slate-400">Jami ko'rishlar</h3>
               </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalViews}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white truncate">{stats.totalViews}</p>
             </div>
 
             <div className="bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200">
@@ -215,16 +215,16 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                 </div>
                 <h3 className="text-sm font-medium text-slate-600 dark:text-slate-400">Jami yuklamalar</h3>
               </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalDownloads}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white truncate">{stats.totalDownloads}</p>
             </div>
           </div>
 
           {/* Activity Chart */}
           <div className="bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 delay-300">
             <div className="p-5 border-b border-slate-100 dark:border-slate-800/50">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-indigo-500" />
-                Faoliyat grafigi (Oxirgi 30 kun)
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 break-words">
+                <BarChart2 className="w-5 h-5 text-indigo-500 shrink-0" />
+                <span className="min-w-0 flex-1 break-words">Faoliyat grafigi (Oxirgi 30 kun)</span>
               </h2>
             </div>
             <div className="p-5 h-[300px] w-full">
@@ -259,12 +259,12 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
 
           {/* Assigned Materials */}
           <div className="bg-white dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 delay-400">
-            <div className="p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-500" />
-                Biriktirilgan materiallar
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 break-words">
+                <FileText className="w-5 h-5 text-blue-500 shrink-0" />
+                <span className="min-w-0 flex-1 break-words">Biriktirilgan materiallar</span>
               </h2>
-              <span className="text-sm font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+              <span className="text-sm font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full self-start sm:self-auto shrink-0">
                 Oxirgi 20 ta
               </span>
             </div>
@@ -285,7 +285,7 @@ export default function TeacherDetailClient({ teacher, stats, timeline, material
                       <h4 className="font-medium text-slate-900 dark:text-white truncate">{mat.title}</h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{mat.subject}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <span className="inline-flex px-2 py-0.5 text-[10px] uppercase font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 rounded">
                         {mat.format}
                       </span>

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 const envSecret = process.env.SESSION_SECRET;
 if (!envSecret && process.env.NODE_ENV === "production") {
-  console.warn("WARNING: SESSION_SECRET is not set in production. Using insecure default key.");
+  throw new Error("SESSION_SECRET muhit o'zgaruvchisi (.env) o'rnatilmagan! Production muhitida standart kalitdan foydalanish xavfsizlikka ziddir.");
 }
 const secretKey = envSecret || "default_secret_key_change_me_in_prod";
 const encodedKey = new TextEncoder().encode(secretKey);

@@ -6,12 +6,27 @@ import { prisma } from "@/lib/db";
 import { createSession, deleteSession, getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
+import { headers } from "next/headers";
+
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
 
+// Oddiy xotira asosidagi IP Rate Limiter
+const ipLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+
 export async function login(prevState: unknown, formData: FormData) {
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") || "unknown";
+  
+  const now = Date.now();
+  const ipRecord = ipLoginAttempts.get(ip);
+  if (ipRecord && ipRecord.lockedUntil > now) {
+    const minutesLeft = Math.ceil((ipRecord.lockedUntil - now) / 60000);
+    return { error: `Ushbu IP orqali juda ko'p urinishlar bo'ldi. Iltimos, ${minutesLeft} daqiqadan so'ng qayta urinib ko'ring.` };
+  }
+
   const email = formData.get("email");
   const password = formData.get("password");
 
@@ -25,42 +40,38 @@ export async function login(prevState: unknown, formData: FormData) {
   });
 
   if (!user || !user.isActive) {
+    // Increment IP rate limit
+    const currentIpRecord = ipLoginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+    currentIpRecord.count += 1;
+    if (currentIpRecord.count >= 5) {
+      currentIpRecord.lockedUntil = now + 15 * 60 * 1000;
+    }
+    ipLoginAttempts.set(ip, currentIpRecord);
+    
     return { error: "Login yoki parol xato, yoxud hisob o'chirilgan." };
-  }
-
-  // Brute-force himoyasi
-  if (user.lockedUntil && user.lockedUntil > new Date()) {
-    const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
-    return { error: `Hisobingiz vaqtincha bloklangan. Iltimos, ${minutesLeft} daqiqadan so'ng qayta urinib ko'ring.` };
   }
 
   const validPassword = await bcrypt.compare(parsed.data.password, user.password);
   
   if (!validPassword) {
-    const attempts = (user.failedLoginAttempts || 0) + 1;
-    const lockDuration = 15 * 60 * 1000; // 15 daqiqa
-    
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        failedLoginAttempts: attempts,
-        lockedUntil: attempts >= 5 ? new Date(Date.now() + lockDuration) : null,
-      }
-    });
-
-    if (attempts >= 5) {
-      return { error: "Xavfsizlik sababli hisobingiz 15 daqiqaga bloklandi." };
+    // Increment IP rate limit
+    const currentIpRecord = ipLoginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+    currentIpRecord.count += 1;
+    if (currentIpRecord.count >= 5) {
+      currentIpRecord.lockedUntil = now + 15 * 60 * 1000;
     }
+    ipLoginAttempts.set(ip, currentIpRecord);
+    
     return { error: "Login yoki parol xato." };
   }
 
-  // Muvaffaqiyatli kirish - urinishlarni tozalash va vaqtni yangilash
+  // Muvaffaqiyatli kirish - IP urinishlarini tozalash
+  ipLoginAttempts.delete(ip);
+  
   await prisma.user.update({
     where: { id: user.id },
     data: { 
       lastLoginAt: new Date(),
-      failedLoginAttempts: 0,
-      lockedUntil: null
     },
   });
 

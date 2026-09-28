@@ -1,9 +1,14 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/session";
 
 export async function GET(
   request: NextRequest,
   context: { params: any }
 ) {
+  const session = await getSession();
+  if (!session) {
+    return new NextResponse("Avtorizatsiyadan o'tilmagan", { status: 401 });
+  }
   // Next.js 15+ da params bu Promise
   const params = await context.params;
   const fileId = params?.id;
